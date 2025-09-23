@@ -1,0 +1,3 @@
+create a hasmap with the value has its key and count as its value
+then sorted that map on the values and sliced that array with its k values
+simple logic 
