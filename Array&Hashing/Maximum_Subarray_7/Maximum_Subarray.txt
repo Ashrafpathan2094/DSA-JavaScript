@@ -1,0 +1,79 @@
+this was the array [-2,1,-3,4,-1,2,1,-5,4]
+
+instead of doing a permutation,combination type of solution what we did was something called
+Kadane's Algorithm 
+
+it goes like this, we set a current sum of two elements (currentSum) and a max sum(maxSum) where we add the elements and if the sum is less than zero we just set the currentSum to zero,
+and afer that we add the currentSum with the current loop item.
+After that we check and set the maxSum and currentSum bigger number 
+
+for example:
+num = [-2,1,-3,4,-1,2,1,-5,4]
+maxSum = nums[0] which is -2
+and currentSum = 0
+
+so what we do is we loop through nums and  first check if the currentSum < 0 
+if yes then we set it to 0 
+and then we add the currentSum with nums[i]
+i.e 0 + -2
+which is -2 
+
+and then set the -2 to as the currentSum
+currentSum += nums[i]
+and set the maxSum as Math.max(currentSum,maxSum)
+so after the first loop the values is 
+
+currentSum = -2
+maxSum = -2
+
+2nd loop
+first currenSum would be 0
+then after adding 
+currentSum += nums[i]
+0 + 1
+currentSum = 1
+maxSum = 1
+
+3rd loop 
+after adding 
+currentSum += nums[i]
+1 + -3
+currenSum = -2
+maxSum = 1
+
+4th loop 
+first currentSum is set to 0 
+then after adding 
+0 + 4 
+currenSum = 4
+maxSum = 4
+
+5th loop 
+currentSum += nums[i]
+4 + -1 
+currenSum = 3 
+maxSum = 4
+
+6th loop 
+currentSum += nums[i]
+3 + 2 =5 
+currenSum = 5 
+maxSum = 5 
+
+7th loop 
+currentSum += nums[i]
+5 + 1 
+currenSum = 6 
+maxSum = 6 
+
+8th loop
+currentSum += nums[i]
+6 + -5
+currenSum = 1
+maxSum 6
+
+9th loop 
+currentSum += nums[i]
+1 + 5
+currenSum = 5 
+maxSum 6 
