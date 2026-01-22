@@ -1,0 +1,7 @@
+sort the array
+check the current ka [0] with the prev ka [1]
+if greater or equal then change it to prev[0]and current [1]
+remove the prev from current from the original array
+then decrement the i
+
+if not greater than just continue
