@@ -1,37 +1,34 @@
 var threeSum = function (nums) {
-  const map = new Map();
-
-  const checkMap = (a, b, c) => {
-    const triple = [a, b, c];
-    const sortedTriple = triple.sort((a, b) => a - b);
-    const sortedStr = sortedTriple.toString();
-    if (map.has(sortedStr)) {
-      map.set(sortedStr, map.get(sortedStr) + 1);
-    } else {
-      map.set(sortedStr, 1);
-    }
-  };
+  nums.sort((a, b) => a - b);
+  const tripletsArr = [];
 
   for (let i = 0; i < nums.length; i++) {
-    for (let j = 0; j < nums.length; j++) {
-      if (i === j) {
-        continue;
-      } else if (i - j === 1) {
-        if (nums[i] + nums[j] + nums[i + 1] === 0) {
-          checkMap(nums[i], nums[j], nums[i + 1]);
+    if (i > 0 && nums[i] == nums[i - 1]) continue;
+    let j = i + 1;
+    let k = nums.length - 1;
+    while (j < k) {
+      if (nums[i] + nums[j] + nums[k] > 0) {
+        k--;
+      } else if (nums[i] + nums[j] + nums[k] < 0) {
+        j++;
+      } else {
+        tripletsArr.push([nums[i], nums[j], nums[k]]);
+        j++;
+        while (nums[j] == nums[j - 1] && j < k) {
+          j++;
         }
-      } else if (j === nums.length - 1) {
-        if (nums[i] + nums[j] + nums[0] === 0) {
-          checkMap(nums[i], nums[j], nums[0]);
-        }
-      } else if (nums[i] + nums[j] + nums[j + 1] === 0) {
-        checkMap(nums[i], nums[j], nums[j + 1]);
       }
     }
   }
-  return Array.from(map.keys()).map((str) => str.split(",").map(Number));
+  return tripletsArr;
 };
 
-console.log(threeSum([-1, 0, 1, 2, -1, -4]));
-console.log(threeSum([0, 1, 1]));
-console.log(threeSum([0, 0, 0]));
+// console.log(threeSum([-1, 0, 1, 2, -1, -4]));
+// console.log(threeSum([0, 1, 1]));
+// console.log(threeSum([0, 0, 0]));
+console.log(
+  threeSum([2, -3, 0, -2, -5, -5, -4, 1, 2, -2, 2, 0, 2, -4, 5, 5, -10]),
+);
+
+// [[-10,5,5],[-5,0,5],[-4,2,2],[-3,-2,5],[-3,1,2],[-2,0,2]]
+// [-10, -2, -2, -3, -4, -4, -5, -5, 0, 0, 1, 2, 2, 2, 2, 5, 5];

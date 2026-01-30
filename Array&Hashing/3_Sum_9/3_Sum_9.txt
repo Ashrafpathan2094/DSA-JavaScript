@@ -1,0 +1,24 @@
+first we sort the array 
+
+then we set i as the start element and after that we set j = i+1 and k as length
+
+
+that is what we do for setting it up as two ponters
+
+then we check the total and if the total is greater than 0 the we decrease the k so that we get smaller number to sum with
+
+if the total is less than 0 we increase k so that we have bigger number to sum with
+
+the main thing here was the duplicate check which was very insightful 
+
+we check the current nums[i] with the nums[i -1 ] when i > 0
+
+if they match then we just skip it 
+
+
+also when we find the triplet 
+
+then we first increase the j++
+and again start a while loop where we check that after increasing the j val
+is that nums[j] equals to the nums[j-1] if it is then we again skip that j by doing j++
+this is to avoid the duplicate which was also very insightful
