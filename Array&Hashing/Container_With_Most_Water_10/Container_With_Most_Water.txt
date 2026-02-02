@@ -1,0 +1,50 @@
+Container With Most Water — Quick Revision Notes
+
+Goal
+Pick two indices so:
+
+area = min(height[left], height[right]) × (right - left)
+
+
+Maximize area.
+
+Steps
+
+Initialize
+
+i = 0
+k = n - 1
+max = 0
+
+
+While pointers don’t meet:
+
+heightLimit = min(height[i], height[k])
+width = k - i
+area = heightLimit * width
+update max
+
+
+Move only the shorter side:
+
+if height[i] < height[k] → i++
+else → k--
+
+Why move shorter pointer
+
+Area depends on smaller height
+
+Moving taller side only reduces width → area cannot improve
+
+Moving shorter side may find taller height → possible bigger area
+
+Complexity
+Time  : O(n)
+Space : O(1)
+
+Memory formula
+two pointers
+check area
+update max
+move smaller
+repeat
