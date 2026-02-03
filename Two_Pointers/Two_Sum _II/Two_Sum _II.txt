@@ -1,0 +1,101 @@
+Two Sum II (Sorted Array) — Revision Notes
+Problem
+
+Given:
+
+sorted array numbers
+
+target sum
+
+Return 1-based indices of two numbers whose sum = target.
+
+Exactly one valid pair.
+
+Core idea
+
+Sorted array enables two-pointer search instead of brute force.
+
+Use:
+
+left  → smallest
+right → largest
+
+
+Shrink inward based on sum.
+
+Setup
+left = 0
+right = n - 1
+
+
+Start with widest pair.
+
+Loop
+while (left < right)
+
+
+Compute:
+
+total = numbers[left] + numbers[right]
+
+Decisions
+Case 1 — match
+total === target
+return [left+1, right+1]
+
+
++1 because problem uses 1-based indexing.
+
+Case 2 — sum too large
+total > target
+right--
+
+
+Array is sorted → moving right leftwards reduces sum.
+
+Case 3 — sum too small
+total < target
+left++
+
+
+Moving left rightwards increases sum.
+
+Why this works
+
+Sorted property guarantees:
+
+move right  → smaller values
+move left   → larger values
+
+
+Each move removes impossible pairs.
+No need to recheck.
+
+Pointer motion sketch
+[ 1 2 3 4 6 9 ], target = 10
+
+L           R  → 1+9=10 ✓
+
+
+Example 2:
+
+[ 1 2 3 4 6 9 ], target = 8
+
+1+9=10 → too big → R--
+1+6=7  → too small → L++
+2+6=8  ✓
+
+Complexity
+Time  : O(n)
+Space : O(1)
+
+
+Single pass, constant memory.
+
+Memory compression
+sorted array
+two pointers
+sum compare
+big → right--
+small → left++
+equal → return
