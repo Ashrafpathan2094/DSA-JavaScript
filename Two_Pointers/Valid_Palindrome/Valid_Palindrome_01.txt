@@ -1,0 +1,118 @@
+Valid Palindrome — Two Pointer Notes
+Problem
+
+Check if a string is a palindrome
+Rules:
+
+ignore spaces
+
+ignore symbols
+
+ignore case
+
+only letters + digits matter
+
+Core idea
+
+Two pointers compare characters from both ends inward.
+
+left →     ← right
+
+
+If all valid characters match → palindrome.
+
+Flow
+1. Edge case
+length == 1 → true
+
+2. Initialize
+i = 0
+k = s.length - 1
+
+3. Loop
+while (i < k)
+
+
+Process until pointers cross.
+
+4. Skip invalid characters
+checkAlphanumeric(char)
+
+
+ASCII ranges:
+
+a–z → 97–122
+0–9 → 48–57
+
+
+Cases:
+
+both invalid  → i++, k--
+left invalid  → i++
+right invalid → k--
+
+
+Meaning: ignore punctuation/spaces.
+
+Example:
+
+"A man, a plan"
+ ^ skip space/comma
+
+5. Compare valid characters
+toLowerCase()
+charCodeAt()
+
+
+Normalize case before comparing.
+
+if equal   → move both
+if not     → return false
+
+Pointer movement visualization
+
+Example:
+
+"A man, a plan, a canal: Panama"
+
+i → A
+k → a
+match
+
+i → space (skip)
+k → : (skip)
+
+
+Eventually:
+
+m ↔ m
+a ↔ a
+n ↔ n
+
+
+All match → true
+
+Helper
+checkAlphanumeric(char)
+
+
+Returns true only if:
+
+[a-z] or [0-9]
+
+
+Everything else ignored.
+
+Complexity
+Time  : O(n)
+Space : O(1)
+
+
+Single pass, no extra storage.
+
+Recall version
+two pointers
+skip non-alphanumeric
+lowercase compare
+mismatch → false
+finish → true
