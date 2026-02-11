@@ -1,0 +1,280 @@
+Trapping Rain Water — Two Pointer Method
+1. Problem Model
+
+Given:
+
+height[i] = elevation at index i
+
+
+Each bar has width = 1.
+Water trapped at index i:
+
+water[i] = min(maxLeft[i], maxRight[i]) - height[i]
+
+
+Constraint:
+
+water[i] >= 0
+
+
+Brute force: compute maxLeft and maxRight arrays → O(n) space.
+Optimized: two pointers → O(1) space.
+
+2. Core Insight
+
+Water level at a position is controlled by the smaller boundary.
+
+If:
+
+maxLeft < maxRight
+
+
+then water depends only on maxLeft.
+
+If:
+
+maxRight < maxLeft
+
+
+then water depends only on maxRight.
+
+That is why we move the pointer at the smaller side.
+
+3. Visualization
+
+Example:
+
+height = [4, 2, 0, 3, 2, 5]
+
+
+Bars:
+
+Index:   0 1 2 3 4 5
+Height:  4 2 0 3 2 5
+
+Diagram:
+
+        █
+█       █
+█     █ █
+█   █ █ █
+█ █ █ █ █
+
+
+Water stored:
+
+        █
+█~~~~~~~█
+█~~~  █~█
+█~█~█ █~█
+█ █ █ █ █
+
+
+Total = 9
+
+4. Two Pointer Structure
+
+Initial state:
+
+L = 0
+R = n-1
+maxLeft = height[L]
+maxRight = height[R]
+
+
+Move inward until L == R.
+
+5. Pointer Movement Logic
+
+At every step:
+
+if height[L] > height[R]
+    R--
+    maxRight = max(maxRight, height[R])
+    water += maxRight - height[R]
+else
+    L++
+    maxLeft = max(maxLeft, height[L])
+    water += maxLeft - height[L]
+
+
+Why this works:
+
+If right bar is smaller:
+
+height[L] > height[R]
+
+
+Right side is limiting boundary.
+
+So trapped water at right depends only on maxRight.
+
+Left side cannot increase water because it is taller.
+
+Symmetric logic for left side.
+
+6. Step-by-Step Visualization (Same Example)
+
+Initial:
+
+L=0 (4)
+R=5 (5)
+maxLeft=4
+maxRight=5
+water=0
+
+
+Since 4 <= 5 → move left
+
+Step 1:
+
+L=1 (2)
+maxLeft = 4
+water += 4 - 2 = 2
+
+
+Step 2:
+
+L=2 (0)
+water += 4 - 0 = 4
+total = 6
+
+
+Step 3:
+
+L=3 (3)
+water += 4 - 3 = 1
+total = 7
+
+
+Step 4:
+
+L=4 (2)
+water += 4 - 2 = 2
+total = 9
+
+
+Now L=4, R=5
+
+Step 5:
+
+L=5
+stop
+
+
+Final water = 9
+
+7. Mental Model
+
+Think of squeezing inward from both ends.
+
+At every step:
+
+Smaller side determines water level.
+
+
+You never need full left/right arrays because:
+
+If left < right → right boundary guaranteed ≥ left
+
+So left boundary limits
+
+This removes dependency on unseen elements.
+
+8. Complexity
+
+Time:
+
+O(n)
+
+
+Space:
+
+O(1)
+
+
+Single pass. No auxiliary arrays.
+
+9. Failure Cases to Remember
+
+Edge cases:
+
+[]
+[1]
+[1,2]
+
+
+Return 0.
+
+Monotonic increasing:
+
+[1,2,3,4]
+
+
+No water.
+
+Monotonic decreasing:
+
+[4,3,2,1]
+
+
+No water.
+
+Flat:
+
+[3,3,3]
+
+
+No water.
+
+10. Pattern Recognition
+
+This is a:
+
+Two pointer + running prefix maximum
+
+
+Similar patterns appear in:
+
+Container With Most Water
+
+Max area problems
+
+Prefix/suffix optimization problems
+
+11. Abstracted Template
+Initialize L, R
+Initialize leftMax, rightMax
+While L < R:
+    if left side smaller:
+        move L
+        update leftMax
+        accumulate
+    else:
+        move R
+        update rightMax
+        accumulate
+
+
+Core principle:
+
+Process the side whose max boundary is smaller.
+
+12. Concept Compression (Revision Snapshot)
+
+Water at i:
+
+min(maxLeft, maxRight) - height[i]
+
+
+Optimization principle:
+
+Smaller boundary dominates.
+
+
+Implementation tool:
+
+Two inward pointers + running maxima.
+
+
+That is the entire problem reduced to its invariant.
