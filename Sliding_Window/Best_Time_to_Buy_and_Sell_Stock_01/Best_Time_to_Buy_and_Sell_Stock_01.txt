@@ -1,0 +1,199 @@
+Best Time to Buy and Sell Stock — Running Minimum Method
+1. Problem Model
+
+You are given:
+
+prices[i] = stock price on day i
+
+
+You must:
+
+Buy once → Sell once → maximize profit
+Sell must happen AFTER buy
+
+
+Profit formula:
+
+profit = sellPrice - buyPrice
+where sellIndex > buyIndex
+
+2. Core Insight
+
+At any day i, the best possible buy is the lowest price seen before day i.
+
+So instead of checking all pairs:
+
+For each day:
+    What is the cheapest price before today?
+
+
+This converts a 2D search into a running state.
+
+3. Visualization
+
+Example:
+
+prices = [7, 1, 5, 3, 6, 4]
+
+
+Graph:
+
+Day:     0 1 2 3 4 5
+Price:   7 1 5 3 6 4
+
+7 |█
+6 |      █
+5 |    █
+4 |        █
+3 |      █
+2 |
+1 |  █
+0 +--------------
+    0 1 2 3 4 5
+
+
+We sweep left → right while remembering the cheapest buy.
+
+4. Running State Variables
+minimumVal → best buy seen so far
+max        → best profit so far
+
+
+Initial:
+
+minimumVal = prices[0]
+max = 0
+
+5. Iteration Logic
+
+For each day:
+
+minimumVal = min(minimumVal, currentPrice)
+
+profitToday = currentPrice - minimumVal
+
+max = max(max, profitToday)
+
+6. Step-by-Step Visualization
+prices = [7, 1, 5, 3, 6, 4]
+
+Day	Price	Minimum So Far	Profit If Sold Today	Max Profit
+0	7	7	0	0
+1	1	1	0	0
+2	5	1	4	4
+3	3	1	2	4
+4	6	1	5	5
+5	4	1	3	5
+
+Final:
+
+Buy at 1
+Sell at 6
+Profit = 5
+
+7. Mental Model
+
+You walk forward in time carrying a note:
+
+"What is the cheapest price I have ever seen?"
+
+
+At every day you ask:
+
+"If I sell today using the best past buy, how much profit?"
+
+
+You never look forward.
+You only accumulate knowledge from the past.
+
+8. Why This Works
+
+Original brute force:
+
+Check all pairs (i < j)
+O(n²)
+
+
+Observation:
+
+For a fixed sell day j, best buy day is:
+
+minimum(prices[0…j])
+
+
+So:
+
+profit(j) = prices[j] - prefixMin[j]
+
+
+We compute prefixMin dynamically while iterating → O(n)
+
+9. Complexity
+
+Time:
+
+O(n)
+
+
+Space:
+
+O(1)
+
+
+Single pass, constant memory.
+
+10. Edge Cases
+
+No profit possible:
+
+[7,6,4,3,1] → 0
+[5] → 0
+[5,5,5] → 0
+
+
+Increasing sequence:
+
+[1,2,3,4,5] → buy first, sell last
+
+11. Pattern Recognition
+
+This is:
+
+Prefix Minimum Tracking
++
+Greedy optimization
+
+
+You are not choosing the final buy immediately.
+You are continuously improving the possibility of a better buy.
+
+12. Abstract Template
+
+Whenever problem says:
+
+maximize A[j] - A[i]  where j > i
+
+
+Use:
+
+track minimum so far
+update answer using current value
+
+13. Concept Compression (Revision Snapshot)
+
+Goal:
+
+Maximize future value - past minimum
+
+
+Invariant:
+
+Best buy is always the minimum seen so far
+
+
+Tool:
+
+Running prefix minimum + greedy update
+
+
+Entire solution reduces to tracking historical minimum while scanning forward.
