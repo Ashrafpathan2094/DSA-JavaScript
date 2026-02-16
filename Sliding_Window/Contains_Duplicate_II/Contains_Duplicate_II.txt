@@ -1,0 +1,194 @@
+Problem
+
+Contains Duplicate II
+
+Given array nums and integer k
+Return true if two equal values exist whose indices differ by ≤ k
+
+Formally:
+
+∃ i, j  such that:
+nums[i] == nums[j]
+|i - j| ≤ k
+
+Wrong Thinking (Common Trap)
+
+Checking duplicates globally:
+
+[1,2,3,1] → duplicate exists → true
+
+
+Incorrect.
+Distance matters.
+
+This is a range-restricted duplicate detection problem.
+
+Core Idea
+
+Only elements within distance k matter.
+
+So instead of remembering entire array, remember only last k elements.
+
+This becomes a moving neighborhood check.
+
+Sliding Window Interpretation
+
+Window size = k
+
+At index i, the window holds:
+
+indices: [i-k ... i-1]
+
+
+If current value already exists inside this window → duplicate within range.
+
+Data structure needed:
+
+Fast lookup + fast delete
+→ HashSet (Set)
+
+Visual Execution
+Example 1
+nums = [1,2,3,1]
+k = 3
+
+
+Step-by-step:
+
+i=0
+window: {}
+add 1
+window: {1}
+
+i=1
+window: {1}
+add 2
+window: {1,2}
+
+i=2
+window: {1,2}
+add 3
+window: {1,2,3}
+
+i=3
+window: {1,2,3}
+1 already exists → TRUE
+
+
+Distance = 3 → valid
+
+Example 2
+nums = [1,0,1,1]
+k = 1
+
+
+Window only keeps previous element
+
+i=0
+{1}
+
+i=1
+remove nums[0]
+{0}
+
+i=2
+remove nums[1]
+{1}
+
+i=3
+1 exists → TRUE
+
+Example 3
+nums = [1,2,3,1,2,3]
+k = 2
+
+
+Observe distances:
+
+1 at index 0 and 3 → distance 3 > 2 → invalid
+2 at index 1 and 4 → invalid
+3 at index 2 and 5 → invalid
+
+
+Window simulation never catches duplicates → FALSE
+
+Code Mechanics
+Early exit
+if (k === 0) return false;
+
+
+Window size zero → impossible to compare
+
+Duplicate detection
+if (windowSet.has(nums[i])) return true;
+
+
+Check BEFORE inserting
+Prevents comparing element with itself
+
+Maintain window size
+if (windowSet.size == k) {
+  windowSet.delete(nums[i - k]);
+}
+
+
+Meaning:
+Remove element leaving distance range
+
+Visualization:
+
+index:   0 1 2 3 4
+value:   a b c d e
+             ^
+window: [b c d] when i=4
+remove a
+
+Insert current element
+windowSet.add(nums[i]);
+
+
+Now it participates in next checks
+
+Mental Model
+
+You are not tracking duplicates
+You are tracking proximity collisions
+
+Think radar range:
+
+current index scans only k distance behind
+outside range = invisible
+
+Complexity
+
+Time: O(n)
+Each element:
+
+inserted once
+
+deleted once
+
+checked once
+
+Space: O(k)
+
+Recognition Pattern
+
+Use this template when problem says:
+
+"distance"
+
+"within k indices"
+
+"nearby"
+
+"at most k apart"
+
+Core Template To Memorize
+for each index i:
+    if value already in window → answer
+    if window size exceeds k → remove outgoing element
+    insert current
+
+
+This is the universal solution for index-distance duplicate problems.

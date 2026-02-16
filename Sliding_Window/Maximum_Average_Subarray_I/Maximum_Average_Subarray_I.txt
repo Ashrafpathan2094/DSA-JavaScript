@@ -1,0 +1,141 @@
+Problem
+
+Maximum Average Subarray I
+
+Given array nums and integer k
+Find maximum average of any contiguous subarray of length k
+
+Brute force:
+
+Every window → sum → divide
+
+Time: O(n*k) → too slow
+
+Core observation:
+Window length is fixed → never recompute sum → only update it
+
+Sliding Window Model
+
+Maintain running sum of a window of size k
+
+Instead of rebuilding:
+
+[a, b, c, d] → sum
+[b, c, d, e] → reuse previous sum
+
+
+Mathematically:
+
+newSum = oldSum + incoming - outgoing
+
+Step-By-Step Execution
+1) Build first window
+nums = [1,12,-5,-6,50,3]
+k = 4
+
+window: [1,12,-5,-6]
+sum = 1 + 12 - 5 - 6 = 2
+avg = 2 / 4 = 0.5
+maxAvg = 0.5
+
+
+This initializes the baseline.
+
+2) Slide window one index at a time
+Move right by 1
+remove: 1
+add: 50
+
+new sum = 2 + 50 - 1 = 51
+avg = 51/4 = 12.75
+maxAvg = 12.75
+
+
+Visualization:
+
+[1, 12, -5, -6]
+   ↓ slide
+[12, -5, -6, 50]
+
+Move again
+remove: 12
+add: 3
+
+new sum = 51 + 3 - 12 = 42
+avg = 10.5
+maxAvg stays 12.75
+
+
+Visualization:
+
+[12, -5, -6, 50]
+   ↓ slide
+[-5, -6, 50, 3]
+
+Code Mechanics Breakdown
+Initial window
+for (let i = 0; i < k; i++) {
+  subTotal += nums[i];
+}
+maxVal = subTotal / k;
+
+
+Purpose:
+Establish first valid average
+Without this → no comparison baseline
+
+Sliding phase
+for (let i = k; i < nums.length; i++) {
+  subTotal = subTotal + nums[i] - nums[i - k];
+  maxVal = Math.max(subTotal / k, maxVal);
+}
+
+
+Key insight:
+nums[i - k] is the element leaving the window
+
+Mental Model (Important)
+
+You are not finding subarrays
+You are moving a frame
+
+FRAME SIZE = k
+
+|----k----|
+[ a  b  c  d  e  f  g ]
+^
+start
+
+shift →
+   ^
+
+shift →
+      ^
+
+
+Each shift costs O(1)
+
+Complexity
+
+Time: O(n)
+Space: O(1)
+
+Why O(n):
+Each element enters window once and leaves once
+
+Pattern Recognition Trigger
+
+Use this whenever:
+
+Fixed window length
+
+Contiguous subarray
+
+Sum / average / count / max/min inside window
+
+Core Formula To Memorize
+Sliding Window Update:
+windowSum += nums[right] - nums[left]
+
+
+Everything in fixed-window problems reduces to this.
