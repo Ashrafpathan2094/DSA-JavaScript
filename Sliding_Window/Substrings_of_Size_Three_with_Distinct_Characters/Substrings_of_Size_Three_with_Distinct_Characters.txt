@@ -1,0 +1,103 @@
+Problem
+Count substrings of length 3 where all characters are different.
+Input: string s
+Output: number of valid substrings
+
+Core Observation
+A substring of length 3 is valid iff:
+a b c  → all distinct
+
+Equivalent condition:
+a ≠ b AND b ≠ c AND a ≠ c
+
+Instead of comparing manually → use a Set
+
+
+Set automatically removes duplicates
+
+
+size === 3 ⇒ all characters unique
+
+
+
+Sliding Window (Fixed Size = 3)
+You never need nested loops.
+Only inspect windows of size 3 while shifting by 1.
+Index:   0 1 2 3 4 5
+String:  x y z z a z
+Windows:
+
+[xyz] → good
+ [yzz] → bad
+  [zza] → bad
+   [zaz] → bad
+
+Answer = 1
+
+Algorithm Logic
+For each index i:
+take s[i], s[i+1], s[i+2]
+put into Set
+if size === 3 → count++
+
+
+Visualization
+Example: "xyzzaz"
+i=0 → xyz → {x,y,z} → size 3 → ✔
+i=1 → yzz → {y,z}   → size 2 → ✘
+i=2 → zza → {z,a}   → size 2 → ✘
+i=3 → zaz → {z,a}   → size 2 → ✘
+
+Result = 1
+
+Example: "bababcabc"
+bab → {b,a}   ✘
+aba → {a,b}   ✘
+bab → {b,a}   ✘
+abc → {a,b,c} ✔
+bca → {b,c,a} ✔
+cab → {c,a,b} ✔
+abc → {a,b,c} ✔
+
+Result = 4
+
+Code Breakdown
+for each index i:
+    create empty Set
+    add 3 chars
+    if size == 3:
+        count++
+
+Time Complexity:
+O(n)
+
+(Each window constant work)
+Space Complexity:
+O(1)
+
+(Max 3 elements)
+
+Why charCodeAt?
+Characters stored as numbers → faster hashing + avoids unicode comparison overhead.
+
+Mental Model
+You are not finding substrings.
+You are validating triplets while scanning:
+Scan → Validate → Shift → Repeat
+
+
+Pattern Category
+Fixed-size Sliding Window + HashSet uniqueness detection
+Used in:
+
+
+substring uniqueness
+
+
+duplicate detection
+
+
+anagram windows
+
+
+small k distinct checks
