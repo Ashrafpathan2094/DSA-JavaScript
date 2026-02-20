@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Longest LCIS — DSA Notes</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@400;500;700;900&display=swap");
+
+      :root {
+        --bg: #080b12;
+        --surface: #0e1320;
+        --surface2: #131825;
+        --border: #1c2538;
+        --accent: #e879f9;
+        --accent2: #22d3ee;
+        --green: #4ade80;
+        --yellow: #facc15;
+        --red: #f87171;
+        --orange: #fb923c;
+        --text: #c4cde0;
+        --muted: #4a5568;
+        --code-bg: #060910;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        min-height: 100vh;
+        padding: 44px 20px 90px;
+      }
+
+      .page {
+        max-width: 940px;
+        margin: 0 auto;
+      }
+
+      /* HEADER */
+      .header {
+        margin-bottom: 56px;
+        position: relative;
+        overflow: hidden;
+      }
+      .header::after {
+        content: "LCIS";
+        position: absolute;
+        right: -10px;
+        top: -20px;
+        font-size: clamp(80px, 18vw, 180px);
+        font-weight: 900;
+        color: #ffffff03;
+        letter-spacing: -8px;
+        pointer-events: none;
+        line-height: 1;
+      }
+      .tag {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--accent);
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .header h1 {
+        font-size: clamp(28px, 6vw, 54px);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.05;
+      }
+      .header .sub {
+        margin-top: 10px;
+        font-size: 15px;
+        color: var(--muted);
+        max-width: 540px;
+      }
+      .meta {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .badge {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        padding: 4px 11px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .badge.purple {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .badge.cyan {
+        border-color: var(--accent2);
+        color: var(--accent2);
+      }
+      .badge.green {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      /* SECTION */
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 30px 32px;
+        margin-bottom: 22px;
+        animation: rise 0.45s ease both;
+      }
+      section:nth-child(2) {
+        animation-delay: 0.06s;
+      }
+      section:nth-child(3) {
+        animation-delay: 0.12s;
+      }
+      section:nth-child(4) {
+        animation-delay: 0.18s;
+      }
+      section:nth-child(5) {
+        animation-delay: 0.24s;
+      }
+      section:nth-child(6) {
+        animation-delay: 0.3s;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .sec-label {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      h2 {
+        font-size: 21px;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 18px;
+      }
+      p {
+        line-height: 1.75;
+        font-size: 15px;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+      code {
+        font-family: "Space Mono", monospace;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--accent2);
+      }
+
+      /* CARDS */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 20px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .card .icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      .card h3 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+      }
+      .card p {
+        font-size: 13px;
+        margin: 0;
+        color: var(--muted);
+      }
+
+      /* CODE */
+      .code-block {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 22px 24px;
+        font-family: "Space Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.95;
+        overflow-x: auto;
+        counter-reset: ln;
+      }
+      .code-block .line {
+        display: block;
+        position: relative;
+        padding-left: 40px;
+        white-space: pre;
+      }
+      .code-block .line::before {
+        counter-increment: ln;
+        content: counter(ln);
+        position: absolute;
+        left: 0;
+        color: var(--muted);
+        width: 28px;
+        text-align: right;
+        font-size: 11px;
+        opacity: 0.45;
+      }
+      .kw {
+        color: #c084fc;
+      }
+      .fn {
+        color: #67e8f9;
+      }
+      .nm {
+        color: var(--yellow);
+      }
+      .cm {
+        color: #2a3550;
+        font-style: italic;
+      }
+      .hl {
+        background: #e879f910;
+        border-radius: 3px;
+      }
+      .hl2 {
+        background: #22d3ee10;
+        border-radius: 3px;
+      }
+
+      /* ═══ VIZ SHELL ═══ */
+      .viz-shell {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      /* toolbar */
+      .viz-toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .viz-toolbar label {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .viz-input {
+        font-family: "Space Mono", monospace;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        color: #fff;
+        padding: 7px 12px;
+        font-size: 12px;
+        flex: 1;
+        min-width: 200px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .viz-input:focus {
+        border-color: var(--accent);
+      }
+      .btn {
+        font-family: "Outfit", sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 7px 16px;
+        border-radius: 7px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn-accent {
+        background: var(--accent);
+        color: #080b12;
+      }
+      .btn-accent:hover {
+        filter: brightness(1.15);
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .btn-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .btn-ghost:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        border-color: var(--border);
+        color: var(--muted);
+      }
+
+      /* legend */
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        padding: 11px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .l-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .l-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+      }
+
+      /* canvas */
+      .canvas-wrap {
+        padding: 28px 20px 10px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        border-radius: 8px;
+      }
+
+      /* state strip */
+      .state-strip {
+        display: flex;
+        gap: 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .state-cell {
+        flex: 1;
+        padding: 12px 16px;
+        border-right: 1px solid var(--border);
+        text-align: center;
+      }
+      .state-cell:last-child {
+        border-right: none;
+      }
+      .state-cell .sc-label {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .state-cell .sc-val {
+        font-family: "Space Mono", monospace;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        transition: color 0.3s;
+      }
+
+      /* step message */
+      .step-msg {
+        padding: 16px 20px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--text);
+        min-height: 70px;
+        border-bottom: 1px solid var(--border);
+      }
+      .step-msg .inc {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .step-msg .eq {
+        color: var(--yellow);
+        font-weight: 700;
+      }
+      .step-msg .dec {
+        color: var(--red);
+        font-weight: 700;
+      }
+      .step-msg .hi {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .step-msg .done {
+        color: var(--green);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .step-msg .mono {
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+      }
+
+      /* result badge */
+      .result-area {
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--border);
+      }
+      .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #4ade8018;
+        border: 1px solid #4ade8050;
+        color: var(--green);
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-family: "Space Mono", monospace;
+        font-size: 13px;
+      }
+      .result-badge .rval {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      /* nav */
+      .nav-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 14px 20px;
+        flex-wrap: wrap;
+      }
+      .step-ctr {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        margin-left: auto;
+      }
+      .speed-sel {
+        font-family: "Space Mono", monospace;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      /* COMPLEXITY */
+      .cplx-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .cplx-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+      }
+      .cplx-val {
+        font-family: "Space Mono", monospace;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--accent2);
+        margin-bottom: 6px;
+      }
+      .cplx-lbl {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* PITFALLS */
+      .pitfall {
+        display: flex;
+        gap: 16px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .pitfall:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .pnum {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #080b12;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .pitfall h4 {
+        font-size: 14px;
+        color: #fff;
+        margin-bottom: 4px;
+        font-weight: 700;
+      }
+      .pitfall p {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      @media (max-width: 600px) {
+        section {
+          padding: 20px 16px;
+        }
+        .cplx-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="tag">DSA Revision Notes</div>
+        <h1>Longest Continuous<br />Increasing Subsequence</h1>
+        <div class="sub">
+          Find the length of the longest strictly increasing contiguous run in
+          an array.
+        </div>
+        <div class="meta">
+          <span class="badge purple">LeetCode #674</span>
+          <span class="badge cyan">Sliding Window / Greedy</span>
+          <span class="badge green">O(n) Time · O(1) Space</span>
+        </div>
+      </div>
+
+      <!-- PROBLEM -->
+      <section>
+        <div class="sec-label">01 / Problem</div>
+        <h2>What are we solving?</h2>
+        <p>
+          Given an unsorted array of integers <code>nums</code>, return the
+          length of the longest
+          <strong>continuous increasing subsequence</strong> (LCIS). The
+          sequence must be strictly increasing (<code>&lt;</code>) and
+          contiguous — no skipping elements.
+        </p>
+        <p>
+          For example: <code>[1, 3, 5, 4, 7]</code> → the longest run is
+          <code>[1, 3, 5]</code> with length <strong>3</strong> (then it breaks
+          at 4 &lt; 5, and [4,7] is only length 2).
+        </p>
+      </section>
+
+      <!-- INTUITION -->
+      <section>
+        <div class="sec-label">02 / Intuition</div>
+        <h2>The Core Idea</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="icon">🏃</div>
+            <h3>Scan Pairs</h3>
+            <p>
+              Compare each adjacent pair <code>nums[i]</code> vs
+              <code>nums[i+1]</code>. That one comparison tells us whether the
+              streak continues or breaks.
+            </p>
+          </div>
+          <div class="card">
+            <div class="icon">🔥</div>
+            <h3>Track Streak</h3>
+            <p>
+              <code>currMax</code> counts the ongoing streak length. On the
+              first increase it becomes 2 (two elements), then adds 1 per extra
+              element.
+            </p>
+          </div>
+          <div class="card">
+            <div class="icon">💀</div>
+            <h3>Break on ≥</h3>
+            <p>
+              Equal resets to 1 (a single element). Decrease resets to 0. Both
+              kill the current streak — the next increase will start fresh from
+              2.
+            </p>
+          </div>
+          <div class="card">
+            <div class="icon">🏆</div>
+            <h3>Global Max</h3>
+            <p>
+              <code>max</code> is updated whenever <code>currMax</code> grows.
+              The answer is just the peak value seen across all streaks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CODE -->
+      <section>
+        <div class="sec-label">03 / Annotated Code</div>
+        <h2>Solution Walkthrough</h2>
+        <div class="code-block">
+          <span class="line"
+            ><span class="kw">var</span>
+            <span class="fn">findLengthOfLCIS</span> =
+            <span class="kw">function</span>(nums) {</span
+          >
+          <span class="line">
+            <span class="kw">if</span> (nums.length ===
+            <span class="nm">0</span>) <span class="kw">return</span>
+            <span class="nm">0</span>;
+            <span class="cm">// edge: empty array</span></span
+          >
+          <span class="line"></span>
+          <span class="line">
+            <span class="kw">let</span> max = <span class="nm">1</span>;
+            <span class="cm">// at minimum 1 element always exists</span></span
+          >
+          <span class="line">
+            <span class="kw">let</span> currMax = <span class="nm">0</span>;
+            <span class="cm">// 0 = no active streak yet</span></span
+          >
+          <span class="line"></span>
+          <span class="line">
+            <span class="kw">for</span> (<span class="kw">let</span> i =
+            <span class="nm">0</span>; i &lt;= nums.length -
+            <span class="nm">1</span>; i++) {</span
+          >
+          <span class="line">
+            <span class="kw">if</span> (nums[i] &lt; nums[i +
+            <span class="nm">1</span>]) {
+            <span class="cm">// ✅ strictly increasing pair</span></span
+          >
+          <span class="line">
+            <span class="hl"
+              >currMax = currMax === <span class="nm">0</span> ? currMax +
+              <span class="nm">2</span> : currMax +
+              <span class="nm">1</span>;</span
+            >
+            <span class="cm">// start(+2) or extend(+1)</span></span
+          >
+          <span class="line">
+            <span class="hl"
+              >max = Math.<span class="fn">max</span>(currMax, max);</span
+            >
+            <span class="cm">// update global best</span></span
+          >
+          <span class="line">
+            } <span class="kw">else if</span> (nums[i] === nums[i +
+            <span class="nm">1</span>]) {
+            <span class="cm">// ⚠️ equal: micro-reset to 1</span></span
+          >
+          <span class="line">
+            <span class="hl2">currMax = <span class="nm">1</span>;</span>
+            <span class="cm">// a lone element, not a streak</span></span
+          >
+          <span class="line">
+            <span class="hl2"
+              >max = Math.<span class="fn">max</span>(currMax, max);</span
+            ></span
+          >
+          <span class="line">
+            <span class="kw">continue</span>;
+            <span class="cm">// skip to next i</span></span
+          >
+          <span class="line">
+            } <span class="kw">else</span> {
+            <span class="cm">// ❌ decrease: full reset</span></span
+          >
+          <span class="line">
+            currMax = <span class="nm">0</span>;
+            <span class="cm"
+              >// wipe streak, next increase starts fresh</span
+            ></span
+          >
+          <span class="line"> }</span>
+          <span class="line"> }</span>
+          <span class="line"> <span class="kw">return</span> max;</span>
+          <span class="line">};</span>
+        </div>
+      </section>
+
+      <!-- VISUALIZATION -->
+      <section>
+        <div class="sec-label">04 / Interactive Visualization</div>
+        <h2>Step-by-Step Simulator</h2>
+        <div class="viz-shell">
+          <!-- toolbar -->
+          <div class="viz-toolbar">
+            <label>nums =&nbsp;</label>
+            <input
+              class="viz-input"
+              id="numsInput"
+              value="1,3,5,4,2,3,4,5"
+              placeholder="e.g. 1,3,5,4,7"
+            />
+            <button class="btn btn-accent" onclick="initViz()">▶ Run</button>
+          </div>
+
+          <!-- legend -->
+          <div class="legend">
+            <div class="l-item">
+              <div class="l-swatch" style="background: #4ade80"></div>
+              Active streak
+            </div>
+            <div class="l-item">
+              <div class="l-swatch" style="background: #e879f9"></div>
+              Current pair (i, i+1)
+            </div>
+            <div class="l-item">
+              <div class="l-swatch" style="background: #facc15"></div>
+              Equal pair
+            </div>
+            <div class="l-item">
+              <div class="l-swatch" style="background: #f87171"></div>
+              Break / decrease
+            </div>
+            <div class="l-item">
+              <div
+                class="l-swatch"
+                style="background: #22d3ee; opacity: 0.7"
+              ></div>
+              Best streak so far
+            </div>
+          </div>
+
+          <!-- canvas -->
+          <div class="canvas-wrap">
+            <canvas id="lcisCanvas" height="220"></canvas>
+          </div>
+
+          <!-- state strip -->
+          <div class="state-strip">
+            <div class="state-cell">
+              <div class="sc-label">i</div>
+              <div class="sc-val" id="sv-i">—</div>
+            </div>
+            <div class="state-cell">
+              <div class="sc-label">nums[i]</div>
+              <div class="sc-val" id="sv-cur">—</div>
+            </div>
+            <div class="state-cell">
+              <div class="sc-label">nums[i+1]</div>
+              <div class="sc-val" id="sv-nxt">—</div>
+            </div>
+            <div class="state-cell">
+              <div class="sc-label">currMax</div>
+              <div class="sc-val" id="sv-curr" style="color: var(--accent)">
+                —
+              </div>
+            </div>
+            <div class="state-cell">
+              <div class="sc-label">max</div>
+              <div class="sc-val" id="sv-max" style="color: var(--green)">
+                —
+              </div>
+            </div>
+          </div>
+
+          <!-- message -->
+          <div class="step-msg" id="stepMsg">
+            Press <strong>Run</strong> to begin.
+          </div>
+
+          <!-- result -->
+          <div class="result-area">
+            <div class="result-badge">
+              🏆 LCIS Length: <span class="rval" id="resultVal">—</span>
+            </div>
+          </div>
+
+          <!-- nav -->
+          <div class="nav-bar">
+            <button
+              class="btn btn-ghost"
+              id="btnPrev"
+              onclick="prevStep()"
+              disabled
+            >
+              ◀ Prev
+            </button>
+            <button
+              class="btn btn-ghost"
+              id="btnNext"
+              onclick="nextStep()"
+              disabled
+            >
+              Next ▶
+            </button>
+            <button class="btn btn-ghost" id="btnAuto" onclick="toggleAuto()">
+              ▶▶ Auto
+            </button>
+            <select class="speed-sel" id="speedSel">
+              <option value="900">Slow</option>
+              <option value="500" selected>Normal</option>
+              <option value="180">Fast</option>
+            </select>
+            <span class="step-ctr" id="stepCtr">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPLEXITY -->
+      <section>
+        <div class="sec-label">05 / Complexity</div>
+        <h2>Time &amp; Space</h2>
+        <div class="cplx-grid">
+          <div class="cplx-card">
+            <div class="cplx-val">O(n)</div>
+            <div class="cplx-lbl">
+              Time — single pass through the array, comparing adjacent pairs
+            </div>
+          </div>
+          <div class="cplx-card">
+            <div class="cplx-val">O(1)</div>
+            <div class="cplx-lbl">
+              Space — only two integer variables: <code>max</code> and
+              <code>currMax</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PITFALLS -->
+      <section>
+        <div class="sec-label">06 / Watch Out For</div>
+        <h2>Common Mistakes</h2>
+        <div class="pitfall">
+          <div class="pnum">1</div>
+          <div>
+            <h4>The +2 vs +1 distinction</h4>
+            <p>
+              When a new streak starts (<code>currMax === 0</code>), two
+              elements are involved, so add 2. For each continuation, only one
+              new element joins, so add 1. Missing this gives an off-by-one in
+              all streak lengths.
+            </p>
+          </div>
+        </div>
+        <div class="pitfall">
+          <div class="pnum">2</div>
+          <div>
+            <h4>Equal elements ≠ increase</h4>
+            <p>
+              The problem requires <em>strictly</em> increasing. Equal adjacent
+              elements (<code>[2,2,2]</code>) break any streak. The code resets
+              <code>currMax = 1</code> (a single element is still a valid
+              sequence of length 1).
+            </p>
+          </div>
+        </div>
+        <div class="pitfall">
+          <div class="pnum">3</div>
+          <div>
+            <h4>Decrease resets to 0, not 1</h4>
+            <p>
+              On a decrease, <code>currMax = 0</code> because the
+              <em>next</em> increase will re-launch the streak from 2. If you
+              reset to 1 instead, you'll overcount by 1 on every new streak.
+            </p>
+          </div>
+        </div>
+        <div class="pitfall">
+          <div class="pnum">4</div>
+          <div>
+            <h4>Loop reads nums[i+1] at i = length-1</h4>
+            <p>
+              The loop condition is <code>i &lt;= nums.length - 1</code>, so on
+              the final iteration <code>nums[i+1]</code> is
+              <code>undefined</code>. All comparisons with
+              <code>undefined</code> return <code>false</code>, so the last
+              element silently falls into the <code>else</code> branch —
+              harmless here, but worth knowing.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // ═══ BUILD STEPS ═══════════════════════════════════════════════════════
+      function buildSteps(nums) {
+        const steps = [];
+        if (!nums.length) return steps;
+
+        let max = 1,
+          currMax = 0;
+
+        // initial state
+        steps.push({
+          i: -1,
+          cur: null,
+          nxt: null,
+          currMax,
+          max,
+          kind: "init",
+          streakStart: -1,
+          streakEnd: -1,
+          bestStart: -1,
+          bestEnd: -1,
+          msg: `Array loaded. max=1, currMax=0. Let's scan adjacent pairs.`,
+        });
+
+        let bestStart = 0,
+          bestEnd = 0;
+        let streakStart = -1,
+          streakEnd = -1;
+
+        for (let i = 0; i <= nums.length - 1; i++) {
+          const cur = nums[i];
+          const nxt = nums[i + 1];
+          let kind;
+
+          if (cur < nxt) {
+            if (currMax === 0) {
+              currMax += 2;
+              streakStart = i;
+            } else currMax += 1;
+            streakEnd = i + 1;
+            max = Math.max(currMax, max);
+            if (currMax === max) {
+              bestStart = streakStart;
+              bestEnd = streakEnd;
+            }
+            kind = "inc";
+          } else if (cur === nxt) {
+            currMax = 1;
+            streakStart = i;
+            streakEnd = i;
+            max = Math.max(currMax, max);
+            kind = "eq";
+          } else {
+            currMax = 0;
+            streakStart = -1;
+            streakEnd = -1;
+            kind = "dec";
+          }
+
+          steps.push({
+            i,
+            cur,
+            nxt,
+            currMax,
+            max,
+            kind,
+            streakStart,
+            streakEnd,
+            bestStart,
+            bestEnd,
+            msg: buildMsg(nums, i, cur, nxt, kind, currMax, max),
+          });
+        }
+
+        // done
+        steps.push({
+          i: nums.length,
+          cur: null,
+          nxt: null,
+          currMax,
+          max,
+          kind: "done",
+          streakStart: -1,
+          streakEnd: -1,
+          bestStart,
+          bestEnd,
+          msg: `✅ Done! Longest LCIS = <span class="done">${max}</span> (highlighted in cyan).`,
+        });
+
+        return steps;
+      }
+
+      function buildMsg(nums, i, cur, nxt, kind, currMax, max) {
+        const pair =
+          nxt !== undefined
+            ? `nums[${i}]=${cur} vs nums[${i + 1}]=${nxt}`
+            : `nums[${i}]=${cur} (last element)`;
+        if (kind === "inc")
+          return `<span class="inc">↑ Increasing</span> — <span class="mono">${pair}</span>. Streak extended to <span class="hi">${currMax}</span>. max = ${max}.`;
+        if (kind === "eq")
+          return `<span class="eq">= Equal</span> — <span class="mono">${pair}</span>. Streak broken. currMax reset to 1.`;
+        if (kind === "dec")
+          return `<span class="dec">↓ Decrease</span> — <span class="mono">${pair}</span>. Streak broken. currMax reset to 0.`;
+        return "";
+      }
+
+      // ═══ CANVAS DRAW ═══════════════════════════════════════════════════════
+      function drawCanvas(step, nums, progress) {
+        const canvas = document.getElementById("lcisCanvas");
+        const dpr = window.devicePixelRatio || 1;
+        const DW = canvas.parentElement.clientWidth - 40;
+        const DH = 220;
+        canvas.style.width = DW + "px";
+        canvas.style.height = DH + "px";
+        canvas.width = DW * dpr;
+        canvas.height = DH * dpr;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(dpr, dpr);
+
+        const W = DW,
+          H = DH;
+        const n = nums.length;
+        const PAD = { t: 40, b: 44, l: 16, r: 16 };
+        const chartW = W - PAD.l - PAD.r;
+        const chartH = H - PAD.t - PAD.b;
+        const maxVal = Math.max(...nums, 1);
+        const cellW = chartW / n;
+        const unitH = chartH / (maxVal + 1);
+
+        function xc(i) {
+          return PAD.l + i * cellW + cellW / 2;
+        }
+        function yb(v) {
+          return PAD.t + chartH - v * unitH;
+        }
+
+        const t = easeOut(Math.min(progress, 1));
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid
+        ctx.strokeStyle = "#1c2538";
+        ctx.lineWidth = 0.5;
+        for (let g = 0; g <= maxVal + 1; g++) {
+          const y = PAD.t + chartH - g * unitH;
+          ctx.beginPath();
+          ctx.moveTo(PAD.l, y);
+          ctx.lineTo(W - PAD.r, y);
+          ctx.stroke();
+        }
+
+        // Best streak background glow
+        if (step.bestStart >= 0 && step.bestEnd >= step.bestStart) {
+          const x1 = PAD.l + step.bestStart * cellW;
+          const x2 = PAD.l + (step.bestEnd + 1) * cellW;
+          const grad = ctx.createLinearGradient(x1, 0, x2, 0);
+          grad.addColorStop(0, "#22d3ee00");
+          grad.addColorStop(0.3, "#22d3ee12");
+          grad.addColorStop(0.7, "#22d3ee12");
+          grad.addColorStop(1, "#22d3ee00");
+          ctx.fillStyle = grad;
+          ctx.fillRect(x1, PAD.t, x2 - x1, chartH);
+        }
+
+        // Active streak background
+        if (
+          step.streakStart >= 0 &&
+          step.streakEnd >= step.streakStart &&
+          step.kind === "inc"
+        ) {
+          const x1 = PAD.l + step.streakStart * cellW;
+          const x2 = PAD.l + (step.streakEnd + 1) * cellW;
+          ctx.fillStyle = "#4ade8010";
+          ctx.fillRect(x1, PAD.t, x2 - x1, chartH);
+        }
+
+        // Lines connecting dots
+        ctx.lineWidth = 2;
+        for (let i = 0; i < n - 1; i++) {
+          const isActive =
+            i >= step.streakStart &&
+            i < step.streakEnd &&
+            step.kind !== "dec" &&
+            step.streakStart >= 0;
+          ctx.strokeStyle = isActive ? "#4ade8080" : "#1c2538";
+          ctx.lineWidth = isActive ? 2.5 : 1;
+          ctx.beginPath();
+          ctx.moveTo(xc(i), yb(nums[i]));
+          ctx.lineTo(xc(i + 1), yb(nums[i + 1]));
+          ctx.stroke();
+        }
+
+        // Draw pair highlight connector (animated)
+        if (
+          step.i >= 0 &&
+          step.i < n - 1 &&
+          step.kind !== "done" &&
+          step.kind !== "init"
+        ) {
+          const ci = step.i,
+            ni = step.i + 1;
+          const col =
+            step.kind === "inc"
+              ? "#4ade80"
+              : step.kind === "eq"
+                ? "#facc15"
+                : "#f87171";
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 3;
+          ctx.globalAlpha = t;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.moveTo(xc(ci), yb(nums[ci]));
+          ctx.lineTo(xc(ni), yb(nums[ni]));
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+
+        // Dots
+        for (let i = 0; i < n; i++) {
+          const x = xc(i),
+            y = yb(nums[i]);
+          const isCurr = i === step.i;
+          const isNext = i === step.i + 1;
+          const inStreak =
+            step.streakStart >= 0 &&
+            i >= step.streakStart &&
+            i <= step.streakEnd;
+          const inBest =
+            step.bestStart >= 0 && i >= step.bestStart && i <= step.bestEnd;
+
+          let color = "#475569",
+            r = 7;
+          if (inBest && step.kind === "done") {
+            color = "#22d3ee";
+            r = 8;
+          } else if (isCurr || isNext) {
+            color =
+              step.kind === "inc"
+                ? "#4ade80"
+                : step.kind === "eq"
+                  ? "#facc15"
+                  : "#f87171";
+            r = 9;
+          } else if (inStreak) {
+            color = "#4ade8090";
+            r = 7;
+          } else if (inBest) {
+            color = "#22d3ee60";
+            r = 7;
+          }
+
+          // glow for active pair
+          if (
+            (isCurr || isNext) &&
+            step.kind !== "init" &&
+            step.kind !== "done"
+          ) {
+            ctx.beginPath();
+            ctx.arc(x, y, r + 6, 0, Math.PI * 2);
+            const glowCol =
+              step.kind === "inc"
+                ? "#4ade8030"
+                : step.kind === "eq"
+                  ? "#facc1530"
+                  : "#f8717130";
+            ctx.fillStyle = glowCol;
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // value label
+          ctx.font = `bold 11px Space Mono, monospace`;
+          ctx.fillStyle = "#fff";
+          ctx.textAlign = "center";
+          ctx.fillText(nums[i], x, y - r - 5);
+
+          // index label
+          ctx.font = "10px Space Mono, monospace";
+          ctx.fillStyle = "#4a5568";
+          ctx.fillText(i, x, H - PAD.b + 16);
+        }
+
+        ctx.textAlign = "left";
+
+        // currMax streak bracket
+        if (
+          step.streakStart >= 0 &&
+          step.streakEnd >= step.streakStart &&
+          step.kind === "inc"
+        ) {
+          const x1 = xc(step.streakStart) - cellW * 0.35;
+          const x2 = xc(step.streakEnd) + cellW * 0.35;
+          const bracketY = PAD.t - 12;
+          ctx.strokeStyle = "#4ade8080";
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(x1, bracketY);
+          ctx.lineTo(x2, bracketY);
+          ctx.moveTo(x1, bracketY);
+          ctx.lineTo(x1, bracketY + 5);
+          ctx.moveTo(x2, bracketY);
+          ctx.lineTo(x2, bracketY + 5);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = "#4ade80";
+          ctx.font = "bold 10px Space Mono, monospace";
+          ctx.textAlign = "center";
+          ctx.fillText(`currMax=${step.currMax}`, (x1 + x2) / 2, bracketY - 4);
+          ctx.textAlign = "left";
+        }
+      }
+
+      function easeOut(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      // ═══ RENDER STEP ══════════════════════════════════════════════════════
+      let steps = [],
+        cur = 0,
+        autoTimer = null;
+      let animId = null,
+        animProg = 1,
+        animTarget = null;
+
+      function animLoop() {
+        animProg += 0.06;
+        if (animProg >= 1) {
+          animProg = 1;
+          drawCanvas(animTarget, window._nums, 1);
+          animTarget = null;
+          return;
+        }
+        drawCanvas(animTarget, window._nums, animProg);
+        animId = requestAnimationFrame(animLoop);
+      }
+
+      function showStep(idx, animate = true) {
+        if (!steps.length) return;
+        idx = Math.max(0, Math.min(steps.length - 1, idx));
+        cur = idx;
+        const s = steps[cur];
+        const nums = window._nums;
+
+        cancelAnimationFrame(animId);
+        animTarget = s;
+        animProg = animate ? 0 : 1;
+        animLoop();
+
+        // state strip
+        document.getElementById("sv-i").textContent =
+          s.i >= 0 && s.i < nums.length ? s.i : "—";
+        document.getElementById("sv-cur").textContent =
+          s.cur !== null ? s.cur : "—";
+        document.getElementById("sv-nxt").textContent =
+          s.nxt !== undefined && s.nxt !== null ? s.nxt : "—";
+        document.getElementById("sv-curr").textContent = s.currMax;
+        document.getElementById("sv-max").textContent = s.max;
+
+        // color currMax
+        const cm = document.getElementById("sv-curr");
+        cm.style.color =
+          s.kind === "inc"
+            ? "var(--green)"
+            : s.kind === "eq"
+              ? "var(--yellow)"
+              : s.kind === "dec"
+                ? "var(--red)"
+                : "var(--accent)";
+
+        // message
+        document.getElementById("stepMsg").innerHTML = s.msg;
+
+        // result
+        document.getElementById("resultVal").textContent =
+          s.kind === "done" ? s.max : "…";
+
+        // counter
+        document.getElementById("stepCtr").textContent =
+          `Step ${cur + 1} / ${steps.length}`;
+        document.getElementById("btnPrev").disabled = cur === 0;
+        document.getElementById("btnNext").disabled = cur === steps.length - 1;
+      }
+
+      function initViz() {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        document.getElementById("btnAuto").textContent = "▶▶ Auto";
+
+        const raw = document.getElementById("numsInput").value;
+        const nums = raw
+          .split(",")
+          .map((v) => parseInt(v.trim()))
+          .filter((v) => !isNaN(v));
+        if (nums.length === 0) {
+          document.getElementById("stepMsg").innerHTML =
+            '<span style="color:var(--red)">Enter valid comma-separated integers.</span>';
+          return;
+        }
+        window._nums = nums;
+        steps = buildSteps(nums);
+        document.getElementById("btnNext").disabled = false;
+        showStep(0, false);
+      }
+
+      function nextStep() {
+        if (cur < steps.length - 1) showStep(cur + 1, true);
+      }
+      function prevStep() {
+        if (cur > 0) showStep(cur - 1, false);
+      }
+      function toggleAuto() {
+        const btn = document.getElementById("btnAuto");
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          btn.textContent = "▶▶ Auto";
+          return;
+        }
+        btn.textContent = "⏹ Stop";
+        const spd = parseInt(document.getElementById("speedSel").value);
+        autoTimer = setInterval(() => {
+          if (cur >= steps.length - 1) {
+            clearInterval(autoTimer);
+            autoTimer = null;
+            btn.textContent = "▶▶ Auto";
+            return;
+          }
+          showStep(cur + 1, true);
+        }, spd);
+      }
+
+      window.addEventListener("resize", () => {
+        if (steps.length && window._nums)
+          drawCanvas(steps[cur], window._nums, 1);
+      });
+      window.onload = initViz;
+    </script>
+  </body>
+</html>
