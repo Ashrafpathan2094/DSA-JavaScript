@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minimum Recolors — Revision Note</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #12121a;
+        --surface2: #1a1a26;
+        --border: #2a2a40;
+        --accent: #7c6af7;
+        --accent2: #f7a26a;
+        --white-block: #f7c948;
+        --black-block: #2a2a40;
+        --text: #e8e8f0;
+        --muted: #6e6e90;
+        --green: #5cf795;
+        --red: #f75c7c;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        min-height: 100vh;
+        padding: 40px 20px;
+        background-image: radial-gradient(
+          ellipse 80% 50% at 50% -20%,
+          rgba(124, 106, 247, 0.15),
+          transparent
+        );
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      /* HEADER */
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 48px;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        border: 1px solid var(--accent);
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        display: inline-block;
+      }
+      h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+      h1 span {
+        color: var(--accent);
+      }
+      .complexity-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      .badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: 700;
+      }
+      .badge-time {
+        background: rgba(92, 247, 149, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(92, 247, 149, 0.3);
+      }
+      .badge-space {
+        background: rgba(124, 106, 247, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(124, 106, 247, 0.3);
+      }
+
+      /* SECTION TITLES */
+      .section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+
+      /* CONCEPT CARD */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+      }
+      .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-title .icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(124, 106, 247, 0.15);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      .card p {
+        color: #a0a0c0;
+        line-height: 1.7;
+        font-size: 15px;
+      }
+
+      /* STEPS */
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .step {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        background: var(--surface2);
+        border-radius: 10px;
+        padding: 14px 16px;
+        border-left: 3px solid var(--accent);
+      }
+      .step-num {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--accent);
+        min-width: 24px;
+        margin-top: 1px;
+      }
+      .step p {
+        font-size: 14px;
+        color: #c0c0d8;
+        line-height: 1.6;
+      }
+      .step p strong {
+        color: var(--text);
+      }
+
+      /* INTERACTIVE VISUALIZER */
+      .visualizer {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+      }
+      .controls {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+        align-items: flex-end;
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 200px;
+      }
+      .control-group label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .control-group input {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        padding: 10px 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        letter-spacing: 0.1em;
+      }
+      .control-group input:focus {
+        border-color: var(--accent);
+      }
+      .run-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+        letter-spacing: 0.04em;
+        height: 44px;
+        align-self: flex-end;
+      }
+      .run-btn:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+      .run-btn:active {
+        transform: translateY(0);
+      }
+
+      /* BLOCK DISPLAY */
+      .block-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        align-items: center;
+      }
+      .block {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+        position: relative;
+      }
+      .block.W {
+        background: rgba(247, 201, 72, 0.15);
+        color: var(--white-block);
+        border-color: rgba(247, 201, 72, 0.4);
+      }
+      .block.B {
+        background: rgba(42, 42, 64, 0.6);
+        color: var(--muted);
+        border-color: var(--border);
+      }
+      .block.in-window {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 12px rgba(124, 106, 247, 0.3);
+        transform: translateY(-3px);
+      }
+      .block.needs-recolor {
+        background: rgba(247, 92, 124, 0.15) !important;
+        border-color: rgba(247, 92, 124, 0.5) !important;
+        color: var(--red) !important;
+      }
+      .block.optimal {
+        background: rgba(92, 247, 149, 0.1) !important;
+        border-color: rgba(92, 247, 149, 0.4) !important;
+      }
+      .block-index {
+        position: absolute;
+        top: -18px;
+        font-size: 10px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .window-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+
+      /* STEPS TABLE */
+      .steps-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      .steps-table th {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        text-align: left;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .steps-table td {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        padding: 9px 12px;
+        border-bottom: 1px solid rgba(42, 42, 64, 0.5);
+        color: #c0c0d8;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .steps-table tr:hover td {
+        background: var(--surface2);
+      }
+      .steps-table tr.active td {
+        background: rgba(124, 106, 247, 0.1);
+        color: var(--text);
+      }
+      .steps-table tr.best td {
+        color: var(--green);
+      }
+      .steps-table td.hl {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .steps-table td.hl-red {
+        color: var(--red);
+      }
+      .steps-table td.hl-green {
+        color: var(--green);
+      }
+
+      /* RESULT */
+      .result-banner {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 106, 247, 0.15),
+          rgba(92, 247, 149, 0.08)
+        );
+        border: 1px solid rgba(124, 106, 247, 0.3);
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .result-label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .result-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--green);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .result-explain {
+        font-size: 14px;
+        color: #a0a0c0;
+      }
+
+      /* ERROR */
+      .error {
+        color: var(--red);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+
+      /* CODE */
+      .code-block {
+        background: var(--surface2);
+        border-radius: 12px;
+        padding: 24px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.9;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        position: relative;
+      }
+      .code-block .kw {
+        color: var(--accent);
+      }
+      .code-block .fn {
+        color: #7ac9f7;
+      }
+      .code-block .str {
+        color: var(--white-block);
+      }
+      .code-block .cm {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .code-block .num {
+        color: var(--accent2);
+      }
+      .code-block .var {
+        color: var(--green);
+      }
+
+      /* NAV CONTROLS */
+      .nav-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        align-items: center;
+      }
+      .nav-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+      .nav-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+      .step-counter {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+        margin-left: 4px;
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 32px 0;
+      }
+
+      /* preset buttons */
+      .presets {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .preset-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        border-radius: 6px;
+        padding: 5px 12px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        transition: all 0.2s;
+      }
+      .preset-btn:hover {
+        border-color: var(--accent2);
+        color: var(--accent2);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .animate-in {
+        animation: fadeIn 0.3s ease forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <div>
+          <div class="tag">Sliding Window · LeetCode 2379</div>
+          <h1>Minimum <span>Recolors</span><br />to get K Blacks</h1>
+          <div class="complexity-badges">
+            <span class="badge badge-time">⏱ O(n) Time</span>
+            <span class="badge badge-space">◻ O(1) Space</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONCEPT -->
+      <div class="card">
+        <div class="card-title">
+          <div class="icon">💡</div>
+          Core Idea
+        </div>
+        <p>
+          Slide a window of size
+          <strong style="color: var(--accent)">k</strong> across the blocks
+          string. Count how many
+          <strong style="color: var(--white-block)">W</strong> (white) blocks
+          are inside the window — those are the ones you must recolor to
+          <strong style="color: var(--muted)">B</strong>. Track the
+          <strong style="color: var(--green)">minimum</strong> over all windows.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <p>
+              <strong>Initialize</strong> — count
+              <span style="color: var(--white-block)">W</span>s in the first
+              window of size k.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <p>
+              <strong>Slide</strong> — add the new right element; remove the old
+              left element that fell out.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <p>
+              <strong>Update min</strong> — after each valid window, record the
+              minimum white count seen so far.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <p>
+              <strong>Return</strong> —
+              <code style="color: var(--green)">min</code> is the answer: fewest
+              recolors needed.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE VISUALIZER -->
+      <div class="visualizer">
+        <div class="section-label">Interactive Visualizer</div>
+
+        <div class="presets">
+          <span
+            style="
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 11px;
+              color: var(--muted);
+              align-self: center;
+              margin-right: 4px;
+            "
+            >Presets:</span
+          >
+          <button class="preset-btn" onclick="loadPreset('WBWBBBW', 2)">
+            WBWBBBW, k=2
+          </button>
+          <button class="preset-btn" onclick="loadPreset('WBBWWBBWBW', 7)">
+            WBBWWBBWBW, k=7
+          </button>
+          <button class="preset-btn" onclick="loadPreset('BWWWBB', 3)">
+            BWWWBB, k=3
+          </button>
+          <button class="preset-btn" onclick="loadPreset('WWWW', 2)">
+            WWWW, k=2
+          </button>
+          <button class="preset-btn" onclick="loadPreset('BBBB', 3)">
+            BBBB, k=3
+          </button>
+        </div>
+
+        <div class="controls">
+          <div class="control-group">
+            <label>Blocks String</label>
+            <input
+              type="text"
+              id="blocksInput"
+              value="WBWBBBW"
+              placeholder="e.g. WBWBBBW"
+              oninput="validateInput()"
+            />
+          </div>
+          <div class="control-group" style="max-width: 100px">
+            <label>Window K</label>
+            <input
+              type="number"
+              id="kInput"
+              value="2"
+              min="1"
+              placeholder="k"
+            />
+          </div>
+          <button class="run-btn" onclick="runVisualization()">▶ Run</button>
+        </div>
+        <div id="inputError" class="error"></div>
+
+        <!-- Block display -->
+        <div id="blockDisplay"></div>
+
+        <!-- Steps table -->
+        <div id="stepsContainer" style="display: none">
+          <div class="section-label" style="margin-top: 24px">Window Steps</div>
+          <table class="steps-table">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Window</th>
+                <th>Whites in Window</th>
+                <th>Current Min</th>
+              </tr>
+            </thead>
+            <tbody id="stepsBody"></tbody>
+          </table>
+          <div class="nav-controls">
+            <button
+              class="nav-btn"
+              id="prevBtn"
+              onclick="navigate(-1)"
+              disabled
+            >
+              ← Prev
+            </button>
+            <button class="nav-btn" id="nextBtn" onclick="navigate(1)">
+              Next →
+            </button>
+            <span class="step-counter" id="stepCounter"></span>
+          </div>
+          <div id="resultBanner"></div>
+        </div>
+      </div>
+
+      <!-- CODE -->
+      <div class="card">
+        <div class="card-title">
+          <div class="icon">⚡</div>
+          Optimal Solution
+        </div>
+        <div class="code-block">
+          <span class="kw">var</span> <span class="fn">minimumRecolors</span> =
+          <span class="kw">function</span>(<span class="var">blocks</span>,
+          <span class="var">k</span>) {<br />
+          &nbsp;&nbsp;<span class="kw">let</span> <span class="var">min</span> =
+          <span class="fn">Infinity</span
+          >;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"
+            >// ✓ cleaner than a magic number</span
+          ><br />
+          &nbsp;&nbsp;<span class="kw">let</span>
+          <span class="var">whites</span> = <span class="num">0</span>;<br />
+          <br />
+          &nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">let</span>
+          <span class="var">i</span> = <span class="num">0</span>;
+          <span class="var">i</span> &lt; <span class="var">blocks</span>.<span
+            class="fn"
+            >length</span
+          >; <span class="var">i</span>++) {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"
+            >// 1. Expand: add new right element</span
+          ><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="var"
+            >blocks</span
+          >[<span class="var">i</span>] === <span class="str">'W'</span>)
+          <span class="var">whites</span>++;<br />
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"
+            >// 2. Shrink: remove element that fell off left</span
+          ><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="var"
+            >i</span
+          >
+          >= <span class="var">k</span>) {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span
+            class="var"
+            >blocks</span
+          >[<span class="var">i</span> - <span class="var">k</span>] ===
+          <span class="str">'W'</span>) <span class="var">whites</span>--;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;}<br />
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"
+            >// 3. Record min when window is full</span
+          ><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="var"
+            >i</span
+          >
+          >= <span class="var">k</span> - <span class="num">1</span>) {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">min</span> =
+          <span class="fn">Math</span>.<span class="fn">min</span>(<span
+            class="var"
+            >min</span
+          >, <span class="var">whites</span>);<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;}<br />
+          &nbsp;&nbsp;}<br />
+          &nbsp;&nbsp;<span class="kw">return</span>
+          <span class="var">min</span>;<br />
+          };
+        </div>
+      </div>
+
+      <!-- KEY INSIGHT -->
+      <div class="card" style="border-color: rgba(124, 106, 247, 0.3)">
+        <div class="card-title">
+          <div class="icon">🔑</div>
+          Why Not Brute Force?
+        </div>
+        <p>
+          A brute-force approach checks every window from scratch —
+          <strong style="color: var(--red)">O(n·k)</strong>. The sliding window
+          <em>reuses</em> the previous count: just subtract what left and add
+          what entered. One pass, constant memory —
+          <strong style="color: var(--green)">O(n)</strong>.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      let allSteps = [];
+      let currentStep = 0;
+      let currentBlocks = "";
+      let currentK = 0;
+
+      function loadPreset(blocks, k) {
+        document.getElementById("blocksInput").value = blocks;
+        document.getElementById("kInput").value = k;
+        runVisualization();
+      }
+
+      function validateInput() {
+        const val = document.getElementById("blocksInput").value.toUpperCase();
+        document.getElementById("blocksInput").value = val;
+      }
+
+      function computeSteps(blocks, k) {
+        const steps = [];
+        let whites = 0;
+        let min = Infinity;
+
+        for (let i = 0; i < blocks.length; i++) {
+          if (blocks[i] === "W") whites++;
+          if (i >= k) {
+            if (blocks[i - k] === "W") whites--;
+          }
+          if (i >= k - 1) {
+            if (whites < min) min = whites;
+            const start = i - k + 1;
+            const end = i;
+            steps.push({ i, start, end, whites, min, isBest: false });
+          }
+        }
+
+        // Mark best steps
+        steps.forEach((s) => {
+          if (s.min === min && s.whites === min) s.isBest = true;
+        });
+        // Make sure at least the first one that achieves the min is marked
+        let marked = false;
+        steps.forEach((s) => {
+          if (!marked && s.whites === min) {
+            s.isBest = true;
+            marked = true;
+          }
+        });
+
+        return steps;
+      }
+
+      function renderBlocks(blocks, k, activeStep) {
+        const display = document.getElementById("blockDisplay");
+        let html = '<div class="block-row" id="blockRow">';
+
+        const inWindow = new Set();
+        const recolors = new Set();
+
+        if (activeStep !== null && allSteps[activeStep]) {
+          const s = allSteps[activeStep];
+          for (let j = s.start; j <= s.end; j++) inWindow.add(j);
+          for (let j = s.start; j <= s.end; j++) {
+            if (blocks[j] === "W") recolors.add(j);
+          }
+        }
+
+        for (let i = 0; i < blocks.length; i++) {
+          let cls = blocks[i];
+          if (inWindow.has(i)) {
+            cls += " in-window";
+            if (recolors.has(i)) cls += " needs-recolor";
+          }
+          html += `<div class="block ${cls}" style="margin-top:22px"><span class="block-index">${i}</span>${blocks[i]}</div>`;
+        }
+        html += "</div>";
+
+        if (activeStep !== null && allSteps[activeStep]) {
+          const s = allSteps[activeStep];
+          html += `<div class="window-label">Window [${s.start}…${s.end}] — <span style="color:var(--red)">${s.whites} white(s)</span> to recolor &nbsp;|&nbsp; running min = <span style="color:var(--green)">${s.min}</span></div>`;
+        }
+
+        display.innerHTML = html;
+      }
+
+      function renderTable(steps) {
+        const tbody = document.getElementById("stepsBody");
+        tbody.innerHTML = "";
+        steps.forEach((s, idx) => {
+          const tr = document.createElement("tr");
+          if (s.isBest) tr.classList.add("best");
+          tr.dataset.idx = idx;
+          tr.innerHTML = `
+      <td class="hl">${idx + 1}</td>
+      <td>[${s.start}…${s.end}]</td>
+      <td class="${s.whites === s.min ? "hl-green" : "hl-red"}">${s.whites}</td>
+      <td class="hl-green">${s.min}</td>
+    `;
+          tr.onclick = () => {
+            currentStep = idx;
+            updateActiveStep();
+          };
+          tbody.appendChild(tr);
+        });
+      }
+
+      function updateActiveStep() {
+        const rows = document.querySelectorAll(".steps-table tbody tr");
+        rows.forEach((r, i) => r.classList.toggle("active", i === currentStep));
+        renderBlocks(currentBlocks, currentK, currentStep);
+        document.getElementById("prevBtn").disabled = currentStep === 0;
+        document.getElementById("nextBtn").disabled =
+          currentStep === allSteps.length - 1;
+        document.getElementById("stepCounter").textContent =
+          `Step ${currentStep + 1} / ${allSteps.length}`;
+
+        // Scroll row into view
+        rows[currentStep]?.scrollIntoView({ block: "nearest" });
+
+        // Result banner on last step
+        if (currentStep === allSteps.length - 1) {
+          const ans = allSteps[allSteps.length - 1].min;
+          document.getElementById("resultBanner").innerHTML = `
+      <div class="result-banner animate-in">
+        <div>
+          <div class="result-label">Answer</div>
+          <div class="result-value">${ans}</div>
+        </div>
+        <div class="result-explain">Minimum recolors needed<br>to get <strong>${currentK}</strong> consecutive blacks</div>
+      </div>`;
+        } else {
+          document.getElementById("resultBanner").innerHTML = "";
+        }
+      }
+
+      function navigate(dir) {
+        currentStep = Math.max(
+          0,
+          Math.min(allSteps.length - 1, currentStep + dir),
+        );
+        updateActiveStep();
+      }
+
+      function runVisualization() {
+        const raw = document
+          .getElementById("blocksInput")
+          .value.toUpperCase()
+          .replace(/[^WB]/g, "");
+        const k = parseInt(document.getElementById("kInput").value);
+        const errEl = document.getElementById("inputError");
+
+        document.getElementById("blocksInput").value = raw;
+
+        if (!raw || raw.length === 0) {
+          errEl.textContent = "✗ Please enter a blocks string (W and B only)";
+          return;
+        }
+        if (isNaN(k) || k < 1) {
+          errEl.textContent = "✗ k must be a positive integer";
+          return;
+        }
+        if (k > raw.length) {
+          errEl.textContent = `✗ k (${k}) cannot be larger than blocks length (${raw.length})`;
+          return;
+        }
+        errEl.textContent = "";
+
+        currentBlocks = raw;
+        currentK = k;
+        allSteps = computeSteps(raw, k);
+        currentStep = 0;
+
+        document.getElementById("stepsContainer").style.display = "block";
+        renderTable(allSteps);
+        document.getElementById("resultBanner").innerHTML = "";
+        updateActiveStep();
+      }
+
+      // Auto-run on load
+      runVisualization();
+    </script>
+  </body>
+</html>
