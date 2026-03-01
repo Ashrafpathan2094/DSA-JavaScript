@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Longest Ones — DSA Notes</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --border: #1e1e2e;
+        --accent: #7cffd4;
+        --accent2: #ff6b6b;
+        --accent3: #ffd166;
+        --text: #e0e0f0;
+        --muted: #666680;
+        --code-bg: #0d0d16;
+        --one: #7cffd4;
+        --zero: #ff6b6b;
+        --flip: #ffd166;
+        --window-bg: rgba(124,255,212,0.07);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Syne', sans-serif;
+        min-height: 100vh;
+        padding: 2rem 1.5rem 4rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      /* ── Header ── */
+      header {
+        border-left: 3px solid var(--accent);
+        padding-left: 1rem;
+        margin-bottom: 3rem;
+      }
+      header .tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .7rem;
+        color: var(--accent);
+        letter-spacing: .15em;
+        text-transform: uppercase;
+        margin-bottom: .4rem;
+      }
+      header h1 {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: 800;
+        line-height: 1.1;
+      }
+      header .sub {
+        color: var(--muted);
+        font-size: .9rem;
+        margin-top: .4rem;
+      }
+
+      /* ── Section ── */
+      .section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem 1.6rem;
+        margin-bottom: 1.5rem;
+      }
+      .section-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .7rem;
+        color: var(--accent);
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+
+      /* ── Problem Statement ── */
+      .problem-box {
+        background: var(--code-bg);
+        border-left: 3px solid var(--accent3);
+        border-radius: 0 8px 8px 0;
+        padding: 1rem 1.2rem;
+        font-size: .9rem;
+        line-height: 1.7;
+        color: var(--text);
+      }
+      .hl { color: var(--accent3); font-weight: 700; }
+
+      /* ── Chips ── */
+      .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
+      .chip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .72rem;
+        padding: .3rem .75rem;
+        border-radius: 99px;
+        border: 1px solid;
+      }
+      .chip.green  { border-color: var(--accent);  color: var(--accent);  background: rgba(124,255,212,.07); }
+      .chip.red    { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,107,.07); }
+      .chip.yellow { border-color: var(--accent3); color: var(--accent3); background: rgba(255,209,102,.07); }
+
+      /* ── Intuition ── */
+      .intuition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .icard {
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+      }
+      .icard .icon { font-size: 1.4rem; margin-bottom: .5rem; }
+      .icard h3 { font-size: .85rem; font-weight: 700; margin-bottom: .3rem; color: var(--accent); }
+      .icard p  { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+      /* ── Array visualiser ── */
+      .array-wrap { overflow-x: auto; padding-bottom: .5rem; }
+      .array-row {
+        display: flex;
+        gap: 4px;
+        min-width: max-content;
+        margin-bottom: .3rem;
+      }
+      .cell {
+        width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .9rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        transition: all .3s;
+        position: relative;
+      }
+      .cell.one  { background: rgba(124,255,212,.12); color: var(--one);  border-color: rgba(124,255,212,.3); }
+      .cell.zero { background: rgba(255,107,107,.12); color: var(--zero); border-color: rgba(255,107,107,.3); }
+      .cell.flipped { background: rgba(255,209,102,.18); color: var(--flip); border-color: var(--flip); }
+      .cell.window-active {
+        box-shadow: 0 0 0 2px var(--accent);
+        background: var(--window-bg);
+      }
+      .idx-row .cell {
+        background: transparent; border-color: transparent;
+        color: var(--muted); font-size: .7rem; height: 20px;
+      }
+      .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .8rem; }
+      .legend-item { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: var(--muted); }
+      .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+      /* ── Steps ── */
+      .step-list { list-style: none; counter-reset: steps; }
+      .step-list li {
+        counter-increment: steps;
+        display: flex;
+        gap: 1rem;
+        padding: .8rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: .875rem;
+        line-height: 1.6;
+        align-items: flex-start;
+      }
+      .step-list li:last-child { border-bottom: none; }
+      .step-list li::before {
+        content: counter(steps, decimal-leading-zero);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .7rem;
+        color: var(--accent);
+        background: rgba(124,255,212,.1);
+        border: 1px solid rgba(124,255,212,.2);
+        border-radius: 4px;
+        padding: .15rem .4rem;
+        min-width: 32px;
+        text-align: center;
+        margin-top: .15rem;
+      }
+
+      /* ── Code block ── */
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.3rem 1.5rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem;
+        line-height: 1.8;
+      }
+      .kw   { color: #c792ea; }
+      .fn   { color: #82aaff; }
+      .var  { color: #7cffd4; }
+      .num  { color: #f78c6c; }
+      .cmt  { color: #546e7a; font-style: italic; }
+      .str  { color: #c3e88d; }
+      .op   { color: #89ddff; }
+
+      /* ── Complexity ── */
+      .complexity-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      }
+      .cbox {
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+      .cbox .big {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent3);
+      }
+      .cbox .label {
+        font-size: .75rem;
+        color: var(--muted);
+        margin-top: .25rem;
+      }
+
+      /* ── Gotchas ── */
+      .gotcha {
+        display: flex; gap: .75rem; align-items: flex-start;
+        background: rgba(255,107,107,.06);
+        border: 1px solid rgba(255,107,107,.2);
+        border-radius: 8px;
+        padding: .9rem 1rem;
+        font-size: .83rem;
+        line-height: 1.6;
+        margin-bottom: .75rem;
+      }
+      .gotcha:last-child { margin-bottom: 0; }
+      .gotcha .g-icon { font-size: 1rem; margin-top: .05rem; }
+      .gotcha strong { color: var(--accent2); }
+
+      /* ── Interactive visualiser ── */
+      #viz-section label {
+        font-size: .8rem;
+        color: var(--muted);
+        margin-bottom: .3rem;
+        display: block;
+      }
+      .viz-controls {
+        display: flex; flex-wrap: wrap; gap: .8rem; align-items: flex-end;
+        margin-bottom: 1.2rem;
+      }
+      .viz-controls input[type=range] {
+        -webkit-appearance: none;
+        width: 160px; height: 4px;
+        background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
+      }
+      .viz-controls input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 14px; height: 14px;
+        border-radius: 50%; background: var(--accent); cursor: pointer;
+      }
+      .viz-btn {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .75rem;
+        padding: .45rem .9rem;
+        border-radius: 6px;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        background: transparent;
+        cursor: pointer;
+        transition: background .2s;
+      }
+      .viz-btn:hover { background: rgba(124,255,212,.1); }
+      .viz-btn.primary {
+        background: var(--accent);
+        color: var(--bg);
+        font-weight: 700;
+      }
+      .viz-btn.primary:hover { opacity: .85; }
+
+      #viz-array { margin-bottom: .6rem; }
+      #viz-pointers { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); margin-top: .5rem; }
+      #viz-pointers span { color: var(--accent); }
+      #viz-status {
+        margin-top: .8rem;
+        font-size: .82rem;
+        color: var(--text);
+        min-height: 1.4rem;
+        background: var(--code-bg);
+        border-radius: 6px;
+        padding: .5rem .8rem;
+        border-left: 3px solid var(--accent3);
+      }
+
+      /* ── Examples ── */
+      .example-block {
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: .8rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem;
+        line-height: 1.8;
+        border: 1px solid var(--border);
+      }
+      .example-block:last-child { margin-bottom: 0; }
+      .example-block .ex-in  { color: var(--muted); }
+      .example-block .ex-out { color: var(--accent3); font-weight: 700; }
+      .example-block .ex-ans { color: var(--accent); }
+
+      /* ── Viz input row ── */
+      .viz-input-row {
+        display: flex; flex-wrap: wrap; gap: .75rem; align-items: flex-end;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--code-bg);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .viz-input-group { display: flex; flex-direction: column; gap: .3rem; }
+      .viz-input-group:first-child { flex: 1 1 260px; }
+      .viz-input-k { min-width: 80px; }
+      .viz-label { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); letter-spacing: .05em; }
+      .viz-hint { color: var(--border); font-size: .62rem; }
+      .viz-input-wrap { position: relative; }
+      #arr-input, #k-input {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .82rem;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: .45rem .75rem;
+        outline: none;
+        transition: border-color .2s;
+        width: 100%;
+      }
+      #arr-input:focus, #k-input:focus { border-color: var(--accent); }
+      #arr-input.error { border-color: var(--accent2); }
+      #k-input { width: 70px; text-align: center; }
+      .arr-error { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--accent2); display: block; min-height: 1rem; margin-top: .2rem; }
+
+      .speed-wrap { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+
+
+        .complexity-grid { grid-template-columns: 1fr; }
+        .intuition-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Header ── -->
+    <header>
+      <div class="tag">LeetCode 1004 · Sliding Window</div>
+      <h1>
+        Max Consecutive Ones III<br /><span style="color: var(--accent)"
+          >Longest Ones</span
+        >
+      </h1>
+      <div class="sub">
+        Binary array · flip at most k zeros · find longest window of 1s
+      </div>
+    </header>
+
+    <!-- ── Problem ── -->
+    <div class="section">
+      <div class="section-title">📋 Problem Statement</div>
+      <div class="problem-box">
+        Given a binary array <span class="hl">nums</span> and an integer
+        <span class="hl">k</span>, return the maximum number of consecutive 1s
+        in the array if you can flip at most <span class="hl">k</span> zeros.
+      </div>
+      <div class="chips">
+        <span class="chip green">Sliding Window</span>
+        <span class="chip yellow">Two Pointers</span>
+        <span class="chip red">Medium</span>
+      </div>
+    </div>
+
+    <!-- ── Intuition ── -->
+    <div class="section">
+      <div class="section-title">💡 Core Intuition</div>
+      <div class="intuition-grid">
+        <div class="icard">
+          <div class="icon">🪟</div>
+          <h3>Sliding Window</h3>
+          <p>
+            Maintain a window [left…right] that contains at most k zeros. Grow
+            right each step.
+          </p>
+        </div>
+        <div class="icard">
+          <div class="icon">↔️</div>
+          <h3>Two Pointers</h3>
+          <p>
+            When zeros in window > k, shrink from left until the count is valid
+            again.
+          </p>
+        </div>
+        <div class="icard">
+          <div class="icon">📏</div>
+          <h3>Track Max</h3>
+          <p>
+            At every step, window size = right − left + 1. Update max
+            continuously.
+          </p>
+        </div>
+        <div class="icard">
+          <div class="icon">🔄</div>
+          <h3>Never Shrink Smaller</h3>
+          <p>
+            We only shift left by 1 when zeros > k, keeping the window size
+            non-decreasing. This is the key insight!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Visual Array ── -->
+    <div class="section">
+      <div class="section-title">
+        🔬 Example Visualised — nums=[1,1,1,0,0,0,1,1,1,1,0], k=2
+      </div>
+      <div class="array-wrap">
+        <div class="array-row idx-row" id="ex-idx"></div>
+        <div class="array-row" id="ex-arr"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div
+            class="legend-dot"
+            style="background: rgba(124, 255, 212, 0.4)"
+          ></div>
+          1 (original)
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-dot"
+            style="background: rgba(255, 107, 107, 0.4)"
+          ></div>
+          0 (original)
+        </div>
+        <div
+          class="legend-dot"
+          style="
+            background: rgba(255, 209, 102, 0.4);
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+          "
+        ></div>
+        <span style="font-size: 0.75rem; color: var(--muted)"
+          >0 flipped (in window)</span
+        >
+        <div class="legend-item">
+          <div
+            style="
+              width: 10px;
+              height: 10px;
+              border: 2px solid var(--accent);
+              border-radius: 2px;
+            "
+          ></div>
+          Best window (indices 3–10)
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Algorithm Steps ── -->
+    <div class="section">
+      <div class="section-title">🧠 Algorithm — Step by Step</div>
+      <ol class="step-list">
+        <li>
+          Initialise <code style="color: var(--accent)">left = 0</code>,
+          <code style="color: var(--accent)">zeros = 0</code>,
+          <code style="color: var(--accent)">max = 0</code>.
+        </li>
+        <li>
+          Iterate <code style="color: var(--accent)">right</code> from 0 to n−1
+          (expand the window one step at a time).
+        </li>
+        <li>
+          If <code style="color: var(--accent)">nums[right] === 0</code>,
+          increment <code style="color: var(--accent)">zeros</code>.
+        </li>
+        <li>
+          If <code style="color: var(--accent2)">zeros > k</code> — window is
+          invalid! Check <code style="color: var(--accent)">nums[left]</code>:
+          if it's a 0, decrement
+          <code style="color: var(--accent)">zeros</code>. Either way, advance
+          <code style="color: var(--accent)">left++</code>.
+        </li>
+        <li>
+          Update
+          <code style="color: var(--accent)"
+            >max = Math.max(max, right − left + 1)</code
+          >.
+        </li>
+        <li>Return <code style="color: var(--accent3)">max</code>.</li>
+      </ol>
+    </div>
+
+    <!-- ── Interactive Visualiser ── -->
+    <div class="section" id="viz-section">
+      <div class="section-title">⚡ Interactive Visualiser</div>
+
+      <div class="viz-input-row">
+        <div class="viz-input-group">
+          <label class="viz-label"
+            >Array
+            <span class="viz-hint"
+              >(only 0s and 1s, comma or space separated)</span
+            ></label
+          >
+          <div class="viz-input-wrap">
+            <input
+              type="text"
+              id="arr-input"
+              value="1,1,1,0,0,0,1,1,1,1,0"
+              placeholder="e.g. 1,0,1,1,0,1"
+              spellcheck="false"
+            />
+            <span id="arr-error" class="arr-error"></span>
+          </div>
+        </div>
+        <div class="viz-input-group viz-input-k">
+          <label class="viz-label">k (max flips)</label>
+          <input type="number" id="k-input" value="2" min="0" max="30" />
+        </div>
+        <button class="viz-btn primary" id="btn-apply">Apply ↵</button>
+      </div>
+
+      <div class="viz-controls">
+        <button class="viz-btn primary" id="btn-play">▶ Play</button>
+        <button class="viz-btn" id="btn-step">Step →</button>
+        <button class="viz-btn" id="btn-reset">↺ Reset</button>
+        <div class="speed-wrap">
+          <label class="viz-label" style="margin-bottom: 0">Speed</label>
+          <input
+            type="range"
+            id="speed-slider"
+            min="1"
+            max="5"
+            value="3"
+            style="width: 90px"
+          />
+        </div>
+      </div>
+
+      <div class="array-wrap">
+        <div class="array-row idx-row" id="viz-idx-row"></div>
+        <div class="array-row" id="viz-array"></div>
+      </div>
+      <div id="viz-pointers"></div>
+      <div id="viz-status">Press Play or Step to start.</div>
+    </div>
+
+    <!-- ── Code ── -->
+    <div class="section">
+      <div class="section-title">💻 Annotated Code</div>
+      <pre><span class="kw">var</span> <span class="fn">longestOnes</span> <span class="op">=</span> <span class="kw">function</span> (<span class="var">nums</span>, <span class="var">k</span>) {
+  <span class="kw">let</span> <span class="var">left</span>  <span class="op">=</span> <span class="num">0</span>;   <span class="cmt">// left pointer of window</span>
+  <span class="kw">let</span> <span class="var">max</span>   <span class="op">=</span> <span class="num">0</span>;   <span class="cmt">// best window size seen</span>
+  <span class="kw">let</span> <span class="var">zeros</span> <span class="op">=</span> <span class="num">0</span>;   <span class="cmt">// zeros inside current window</span>
+
+  <span class="kw">for</span> (<span class="kw">let</span> <span class="var">right</span> <span class="op">=</span> <span class="num">0</span>; <span class="var">right</span> <span class="op">&lt;</span> <span class="var">nums</span>.length; <span class="var">right</span><span class="op">++</span>) {
+    <span class="cmt">// expand window: include nums[right]</span>
+    <span class="kw">if</span> (<span class="var">nums</span>[<span class="var">right</span>] <span class="op">===</span> <span class="num">0</span>) <span class="var">zeros</span><span class="op">++</span>;
+
+    <span class="cmt">// window invalid → shrink from left by exactly 1</span>
+    <span class="kw">if</span> (<span class="var">zeros</span> <span class="op">&gt;</span> <span class="var">k</span>) {
+      <span class="kw">if</span> (<span class="var">nums</span>[<span class="var">left</span>] <span class="op">===</span> <span class="num">0</span>) <span class="var">zeros</span><span class="op">--</span>; <span class="cmt">// evict a zero</span>
+      <span class="var">left</span><span class="op">++</span>;
+    }
+
+    <span class="cmt">// window always grows or stays same size → safe to max every step</span>
+    <span class="var">max</span> <span class="op">=</span> Math.<span class="fn">max</span>(<span class="var">max</span>, <span class="var">right</span> <span class="op">-</span> <span class="var">left</span> <span class="op">+</span> <span class="num">1</span>);
+  }
+  <span class="kw">return</span> <span class="var">max</span>;
+};</pre>
+    </div>
+
+    <!-- ── Complexity ── -->
+    <div class="section">
+      <div class="section-title">📊 Complexity</div>
+      <div class="complexity-grid">
+        <div class="cbox">
+          <div class="big">O(n)</div>
+          <div class="label">
+            Time — each element visited at most twice (once by right, once by
+            left)
+          </div>
+        </div>
+        <div class="cbox">
+          <div class="big">O(1)</div>
+          <div class="label">
+            Space — only 3 variables, no extra data structures
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Gotchas ── -->
+    <div class="section">
+      <div class="section-title">⚠️ Common Gotchas</div>
+      <div class="gotcha">
+        <div class="g-icon">🔄</div>
+        <div>
+          <strong>Don't reset left to 0</strong> — we only ever increment left,
+          never jump it backward. The window only slides forward.
+        </div>
+      </div>
+      <div class="gotcha">
+        <div class="g-icon">1️⃣</div>
+        <div>
+          <strong>Move left by exactly 1</strong> — even if zeros is still > k
+          after moving, we don't loop. The next right iteration will handle it.
+        </div>
+      </div>
+      <div class="gotcha">
+        <div class="g-icon">🪟</div>
+        <div>
+          <strong>Window never shrinks below its max</strong> — this is the
+          elegant insight that lets us update max at every step with right −
+          left + 1.
+        </div>
+      </div>
+      <div class="gotcha">
+        <div class="g-icon">🎯</div>
+        <div>
+          <strong>k=0 is valid</strong> — the algorithm handles it naturally; no
+          zeros are allowed in the window.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Examples ── -->
+    <div class="section">
+      <div class="section-title">✅ Test Cases</div>
+      <div class="example-block">
+        <div class="ex-in">Input: nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2</div>
+        <div class="ex-out">Output: <span class="ex-ans">6</span></div>
+        <div class="ex-in">
+          Window: [0,0,<b style="color: var(--flip)">0</b>,1,1,1,1,<b
+            style="color: var(--flip)"
+            >0</b
+          >] → indices 3–10, flip zeros at 3&5
+        </div>
+      </div>
+      <div class="example-block">
+        <div class="ex-in">
+          Input: nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3
+        </div>
+        <div class="ex-out">Output: <span class="ex-ans">10</span></div>
+        <div class="ex-in">
+          Best window contains 3 zeros which are all flipped
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ── Static example array ──
+      const exNums = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0];
+      const bestStart = 3,
+        bestEnd = 10;
+      const idxRow = document.getElementById("ex-idx");
+      const arrRow = document.getElementById("ex-arr");
+      exNums.forEach((v, i) => {
+        const ic = document.createElement("div");
+        ic.className = "cell";
+        ic.textContent = i;
+        idxRow.appendChild(ic);
+        const c = document.createElement("div");
+        c.textContent = v;
+        if (i >= bestStart && i <= bestEnd && v === 0)
+          c.className = "cell flipped window-active";
+        else if (i >= bestStart && i <= bestEnd)
+          c.className = "cell one window-active";
+        else if (v === 1) c.className = "cell one";
+        else c.className = "cell zero";
+        arrRow.appendChild(c);
+      });
+
+      // ── Interactive visualiser ──
+      let vizNums = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0];
+      let state = null;
+      let playInterval = null;
+
+      const arrInput = document.getElementById("arr-input");
+      const kInput = document.getElementById("k-input");
+      const arrError = document.getElementById("arr-error");
+      const vizArr = document.getElementById("viz-array");
+      const vizIdx = document.getElementById("viz-idx-row");
+      const vizPtr = document.getElementById("viz-pointers");
+      const vizStat = document.getElementById("viz-status");
+      const speedSlider = document.getElementById("speed-slider");
+
+      function getSpeedMs() {
+        const v = parseInt(speedSlider.value); // 1–5
+        return [900, 650, 400, 220, 90][v - 1];
+      }
+
+      function parseInput() {
+        const raw = arrInput.value.trim();
+        const tokens = raw.split(/[\s,]+/).filter(Boolean);
+        if (tokens.length === 0) {
+          arrError.textContent = "Array cannot be empty.";
+          arrInput.classList.add("error");
+          return null;
+        }
+        const nums = tokens.map(Number);
+        if (nums.some((n) => n !== 0 && n !== 1)) {
+          arrError.textContent = "Only 0s and 1s allowed.";
+          arrInput.classList.add("error");
+          return null;
+        }
+        if (nums.length > 50) {
+          arrError.textContent = "Max 50 elements for display.";
+          arrInput.classList.add("error");
+          return null;
+        }
+        arrError.textContent = "";
+        arrInput.classList.remove("error");
+        return nums;
+      }
+
+      function getK() {
+        const v = parseInt(kInput.value);
+        return isNaN(v) || v < 0 ? 0 : v;
+      }
+
+      function applyInput() {
+        stopPlay();
+        const nums = parseInput();
+        if (!nums) return;
+        vizNums = nums;
+        resetViz();
+        vizStat.textContent = "Array updated! Press Play or Step to start.";
+      }
+
+      function stopPlay() {
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+          document.getElementById("btn-play").textContent = "▶ Play";
+        }
+      }
+
+      function resetViz() {
+        const k = getK();
+        state = { left: 0, right: -1, zeros: 0, max: 0, k, done: false };
+        renderViz(null);
+      }
+
+      function renderViz(status) {
+        const { left, right, zeros, max, k } = state;
+        vizArr.innerHTML = "";
+        vizIdx.innerHTML = "";
+        vizNums.forEach((v, i) => {
+          const ic = document.createElement("div");
+          ic.className = "cell";
+          ic.textContent = i;
+          vizIdx.appendChild(ic);
+          const c = document.createElement("div");
+          c.textContent = v;
+          const inWindow = right >= 0 && i >= left && i <= right;
+          if (inWindow && v === 0) c.className = "cell flipped window-active";
+          else if (inWindow && v === 1) c.className = "cell one window-active";
+          else if (v === 1) c.className = "cell one";
+          else c.className = "cell zero";
+          // mark left and right pointer with a tiny label
+          if (i === left && right >= 0)
+            c.setAttribute("data-ptr", i === right ? "L=R" : "L");
+          if (i === right && i !== left) c.setAttribute("data-ptr", "R");
+          vizArr.appendChild(c);
+        });
+        vizPtr.innerHTML =
+          right >= 0
+            ? `left=<span>${left}</span>  right=<span>${right}</span>  zeros=<span>${zeros}</span>  max=<span>${max}</span>  k=<span>${k}</span>`
+            : `k = <span>${k}</span>  nums length = <span>${vizNums.length}</span> — ready`;
+        if (status) vizStat.textContent = status;
+      }
+
+      function stepViz() {
+        if (!state) resetViz();
+        if (state.done) {
+          vizStat.textContent = `✅ Done! Max consecutive ones = ${state.max}`;
+          return;
+        }
+        state.right++;
+        if (state.right >= vizNums.length) {
+          state.done = true;
+          renderViz(null);
+          vizStat.textContent = `✅ Done! Max = ${state.max}`;
+          return;
+        }
+        let msg = "";
+        if (vizNums[state.right] === 0) {
+          state.zeros++;
+          msg += `nums[${state.right}]=0 → zeros→${state.zeros}. `;
+        } else {
+          msg += `nums[${state.right}]=1, window grows. `;
+        }
+        if (state.zeros > state.k) {
+          if (vizNums[state.left] === 0) {
+            state.zeros--;
+            msg += `zeros>k: evict 0 at left(${state.left}). `;
+          } else {
+            msg += `zeros>k: evict 1 at left(${state.left}). `;
+          }
+          state.left++;
+        }
+        const winSize = state.right - state.left + 1;
+        if (winSize > state.max) {
+          state.max = winSize;
+          msg += `🆕 New max = ${state.max}!`;
+        } else msg += `Window size = ${winSize}.`;
+        renderViz(msg);
+      }
+
+      document
+        .getElementById("btn-apply")
+        .addEventListener("click", applyInput);
+      arrInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") applyInput();
+      });
+      kInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") applyInput();
+      });
+
+      document
+        .getElementById("btn-play")
+        .addEventListener("click", function () {
+          if (playInterval) {
+            stopPlay();
+            return;
+          }
+          if (!state || state.done) resetViz();
+          this.textContent = "⏸ Pause";
+          playInterval = setInterval(() => {
+            stepViz();
+            if (state.done) {
+              stopPlay();
+            }
+          }, getSpeedMs());
+        });
+      document.getElementById("btn-step").addEventListener("click", () => {
+        if (playInterval) return;
+        if (!state) resetViz();
+        stepViz();
+      });
+      document.getElementById("btn-reset").addEventListener("click", () => {
+        stopPlay();
+        resetViz();
+        vizStat.textContent = "Press Play or Step to start.";
+      });
+
+      resetViz();
+    </script>
+  </body>
+</html>
