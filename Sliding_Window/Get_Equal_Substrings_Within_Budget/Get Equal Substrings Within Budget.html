@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Equal Substring Visualizer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0a0a0f;
+        --panel: #12121a;
+        --border: #1e1e2e;
+        --accent: #7c3aed;
+        --accent-light: #a78bfa;
+        --green: #10b981;
+        --red: #ef4444;
+        --yellow: #f59e0b;
+        --cyan: #06b6d4;
+        --text: #e2e8f0;
+        --muted: #64748b;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+
+      .wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+      .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent);
+      }
+      .badge-text {
+        font-size: 11px;
+        letter-spacing: 4px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(22px, 4vw, 34px);
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+      h1 span {
+        background: linear-gradient(135deg, var(--accent), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Card */
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 24px;
+        margin-bottom: 16px;
+      }
+
+      .section-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+
+      /* Inputs */
+      .inputs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 130px;
+        gap: 16px;
+      }
+      @media (max-width: 600px) {
+        .inputs-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .input-group label {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .input-group input {
+        width: 100%;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        font-weight: 600;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .input-group input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+      }
+
+      /* String rows */
+      .row-label {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+      .row-label.s {
+        color: var(--cyan);
+        background: rgba(6, 182, 212, 0.1);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+      }
+      .row-label.t {
+        color: var(--accent-light);
+        background: rgba(167, 139, 250, 0.1);
+        border: 1px solid rgba(167, 139, 250, 0.2);
+      }
+
+      .chars-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .char-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .char-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        border: 2px solid var(--border);
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--muted);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .char-box.in-window {
+        background: rgba(124, 58, 237, 0.15);
+        border-color: var(--accent);
+        color: var(--text);
+        box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+      }
+      .char-box.is-left {
+        border-color: var(--cyan) !important;
+      }
+      .char-box.is-right {
+        border-color: var(--accent-light) !important;
+      }
+
+      .ptr-label {
+        position: absolute;
+        bottom: -18px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      .ptr-L {
+        color: var(--cyan);
+      }
+      .ptr-R {
+        color: var(--accent-light);
+      }
+
+      .cost-label {
+        font-size: 10px;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        color: var(--muted);
+        transition: color 0.3s;
+      }
+      .cost-label.active {
+        color: var(--yellow);
+      }
+
+      .idx-label {
+        font-size: 10px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--muted);
+      }
+
+      .string-section {
+        margin-bottom: 28px;
+      }
+      .string-section:last-child {
+        margin-bottom: 0;
+      }
+
+      /* Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 600px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .stat-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        text-align: center;
+      }
+      .stat-label {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .stat-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px;
+        font-weight: 700;
+        transition: color 0.3s;
+      }
+
+      /* Note Box */
+      .note-box {
+        border-radius: 12px;
+        padding: 14px 20px;
+        margin-bottom: 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+      }
+      .note-box.expand {
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        color: var(--accent-light);
+      }
+      .note-box.shrink {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: var(--red);
+      }
+      .note-box.update {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: var(--green);
+      }
+
+      /* Controls */
+      .controls {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-family: "Inter", sans-serif;
+      }
+      .btn:hover {
+        filter: brightness(1.2);
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn-default {
+        background: var(--border);
+        color: var(--text);
+      }
+      .btn-play {
+        background: var(--accent);
+        color: #fff;
+        min-width: 90px;
+        box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
+        padding: 8px 22px;
+        font-weight: 700;
+      }
+      .btn-play.paused {
+        background: var(--red);
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .speed-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .speed-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+      input[type="range"] {
+        accent-color: var(--accent);
+        width: 80px;
+        cursor: pointer;
+      }
+
+      .step-counter {
+        font-size: 12px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      /* Progress */
+      .progress-track {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--cyan));
+        border-radius: 2px;
+        transition: width 0.3s ease;
+      }
+
+      /* Algo Notes */
+      .algo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 500px) {
+        .algo-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .algo-item {
+        background: var(--bg);
+        border-radius: 10px;
+        padding: 14px 16px;
+        border-left: 3px solid var(--accent);
+      }
+      .algo-item-title {
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .algo-item-body {
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.55;
+      }
+
+      /* Code block */
+      .code-block {
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 18px 20px;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.8;
+        border: 1px solid var(--border);
+      }
+      .code-block .kw {
+        color: #c084fc;
+      }
+      .code-block .fn {
+        color: #67e8f9;
+      }
+      .code-block .num {
+        color: #fb923c;
+      }
+      .code-block .cmt {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .code-block .str {
+        color: #86efac;
+      }
+      .code-block .hl {
+        background: rgba(124, 58, 237, 0.25);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+
+      /* Result */
+      .result-box {
+        background: rgba(16, 185, 129, 0.08);
+        border: 2px solid var(--green);
+        border-radius: 16px;
+        padding: 20px 24px;
+        text-align: center;
+        margin-top: 16px;
+        box-shadow: 0 0 32px rgba(16, 185, 129, 0.15);
+        display: none;
+      }
+      .result-box.show {
+        display: block;
+      }
+      .result-tag {
+        font-size: 12px;
+        color: var(--green);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .result-val {
+        font-family: "Syne", sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .result-val span {
+        color: var(--green);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--panel);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-badge">
+          <div class="dot"></div>
+          <span class="badge-text">Sliding Window · LeetCode 1208</span>
+          <div class="dot"></div>
+        </div>
+        <h1>Equal Substring <span>Visualizer</span></h1>
+      </div>
+
+      <!-- Inputs -->
+      <div class="card">
+        <div class="inputs-grid">
+          <div class="input-group">
+            <label>String s</label>
+            <input
+              type="text"
+              id="inp-s"
+              value="abcd"
+              maxlength="14"
+              placeholder="source"
+            />
+          </div>
+          <div class="input-group">
+            <label>String t</label>
+            <input
+              type="text"
+              id="inp-t"
+              value="bcdf"
+              maxlength="14"
+              placeholder="target"
+            />
+          </div>
+          <div class="input-group">
+            <label>Max Cost</label>
+            <input
+              type="number"
+              id="inp-cost"
+              value="3"
+              min="0"
+              placeholder="integer"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Window State -->
+      <div class="card">
+        <div class="section-label">Window State</div>
+        <div class="string-section">
+          <div class="row-label s">s</div>
+          <div class="chars-row" id="row-s"></div>
+        </div>
+        <div class="string-section">
+          <div class="row-label t" style="margin-top: 8px">
+            t
+            <small
+              style="
+                font-size: 10px;
+                color: var(--muted);
+                font-weight: 400;
+                letter-spacing: 0;
+              "
+              >(cost per char below)</small
+            >
+          </div>
+          <div class="chars-row" id="row-t"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Left Pointer</div>
+          <div class="stat-value" id="stat-left" style="color: var(--cyan)">
+            0
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Right Pointer</div>
+          <div
+            class="stat-value"
+            id="stat-right"
+            style="color: var(--accent-light)"
+          >
+            —
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Current Cost</div>
+          <div class="stat-value" id="stat-cost" style="color: var(--green)">
+            0
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Max Length</div>
+          <div class="stat-value" id="stat-maxlen" style="color: var(--yellow)">
+            0
+          </div>
+        </div>
+      </div>
+
+      <!-- Note -->
+      <div class="note-box expand" id="note-box">
+        <span id="note-icon">➡</span>
+        <span id="note-text">Configure inputs and press Play to begin.</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn btn-default" id="btn-reset">⏮ Reset</button>
+        <button class="btn btn-default" id="btn-prev">◀ Prev</button>
+        <button class="btn btn-play" id="btn-play">▶ Play</button>
+        <button class="btn btn-default" id="btn-next">Next ▶</button>
+        <div class="spacer"></div>
+        <div class="speed-wrap">
+          <span class="speed-label">SPEED</span>
+          <input type="range" id="speed-slider" min="1" max="10" value="6" />
+        </div>
+        <span class="step-counter" id="step-counter">0 / 0</span>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <!-- Algorithm Notes -->
+      <div class="card">
+        <div class="section-label">Algorithm Notes</div>
+        <div class="algo-grid">
+          <div class="algo-item" style="border-left-color: var(--accent)">
+            <div class="algo-item-title" style="color: var(--accent)">
+              Pattern
+            </div>
+            <div class="algo-item-body">Sliding Window (Variable Size)</div>
+          </div>
+          <div class="algo-item" style="border-left-color: var(--green)">
+            <div class="algo-item-title" style="color: var(--green)">
+              Time Complexity
+            </div>
+            <div class="algo-item-body">
+              O(n) — each element entered/exited at most once
+            </div>
+          </div>
+          <div class="algo-item" style="border-left-color: var(--cyan)">
+            <div class="algo-item-title" style="color: var(--cyan)">
+              Space Complexity
+            </div>
+            <div class="algo-item-body">
+              O(1) — only pointers & running cost
+            </div>
+          </div>
+          <div class="algo-item" style="border-left-color: var(--yellow)">
+            <div class="algo-item-title" style="color: var(--yellow)">
+              Key Insight
+            </div>
+            <div class="algo-item-body">
+              Expand right freely; shrink left when cost exceeds budget
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code -->
+      <div class="card">
+        <div class="section-label">Implementation</div>
+        <div class="code-block" id="code-block">
+          <span class="kw">var</span> <span class="fn">equalSubstring</span> =
+          <span class="kw">function</span>(s, t, maxCost) {
+          <span class="kw">let</span> left = <span class="num">0</span>;
+          <span class="kw">let</span> cost = <span class="num">0</span>;
+          <span class="kw">let</span> maxLength = <span class="num">0</span>;
+
+          <span class="kw">for</span> (<span class="kw">let</span> right =
+          <span class="num">0</span>; right &lt; s.length; right++) { cost +=
+          Math.<span class="fn">abs</span>(s.<span class="fn">charCodeAt</span
+          >(right) - t.<span class="fn">charCodeAt</span>(right));
+
+          <span class="kw">while</span> (cost &gt; maxCost) { cost -= Math.<span
+            class="fn"
+            >abs</span
+          >(s.<span class="fn">charCodeAt</span>(left) - t.<span class="fn"
+            >charCodeAt</span
+          >(left)); left++; } maxLength = Math.<span class="fn">max</span
+          >(maxLength, right - left + <span class="num">1</span>); }
+          <span class="kw">return</span> maxLength; };
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="result-box">
+        <div class="result-tag">✓ Final Result</div>
+        <div class="result-val">
+          Max Equal Substring Length = <span id="result-val">0</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ─── State ───────────────────────────────────────────────────
+      let steps = [];
+      let stepIdx = 0;
+      let playing = false;
+      let intervalId = null;
+      let speedMs = 700;
+
+      // ─── DOM refs ─────────────────────────────────────────────────
+      const inpS = document.getElementById("inp-s");
+      const inpT = document.getElementById("inp-t");
+      const inpCost = document.getElementById("inp-cost");
+      const rowS = document.getElementById("row-s");
+      const rowT = document.getElementById("row-t");
+      const statLeft = document.getElementById("stat-left");
+      const statRight = document.getElementById("stat-right");
+      const statCost = document.getElementById("stat-cost");
+      const statMax = document.getElementById("stat-maxlen");
+      const noteBox = document.getElementById("note-box");
+      const noteIcon = document.getElementById("note-icon");
+      const noteText = document.getElementById("note-text");
+      const btnReset = document.getElementById("btn-reset");
+      const btnPrev = document.getElementById("btn-prev");
+      const btnPlay = document.getElementById("btn-play");
+      const btnNext = document.getElementById("btn-next");
+      const speedSl = document.getElementById("speed-slider");
+      const stepCtr = document.getElementById("step-counter");
+      const progressF = document.getElementById("progress-fill");
+      const resultBox = document.getElementById("result-box");
+      const resultVal = document.getElementById("result-val");
+
+      // ─── Compute Steps ───────────────────────────────────────────
+      function computeSteps(s, t, maxCost) {
+        const out = [];
+        let left = 0,
+          cost = 0,
+          maxLength = 0;
+
+        for (let right = 0; right < s.length; right++) {
+          const cc = Math.abs(s.charCodeAt(right) - t.charCodeAt(right));
+          cost += cc;
+          out.push({
+            left,
+            right,
+            cost,
+            maxLength,
+            action: "expand",
+            note: `Expand right → index ${right}: '${s[right]}'→'${t[right]}' costs ${cc}, total cost = ${cost}`,
+          });
+
+          while (cost > maxCost) {
+            const rc = Math.abs(s.charCodeAt(left) - t.charCodeAt(left));
+            cost -= rc;
+            out.push({
+              left,
+              right,
+              cost,
+              maxLength,
+              action: "shrink",
+              note: `Cost exceeded! Shrink left ← index ${left}: remove '${s[left]}'→'${t[left]}' (cost ${rc}), new cost = ${cost}`,
+            });
+            left++;
+          }
+
+          maxLength = Math.max(maxLength, right - left + 1);
+          out.push({
+            left,
+            right,
+            cost,
+            maxLength,
+            action: "update",
+            note: `✓ Window [${left}..${right}] valid. Size = ${right - left + 1}, maxLength = ${maxLength}`,
+          });
+        }
+        return out;
+      }
+
+      // ─── Build char rows ─────────────────────────────────────────
+      function buildRows(s, t) {
+        rowS.innerHTML = "";
+        rowT.innerHTML = "";
+        const n = Math.min(s.length, t.length);
+        for (let i = 0; i < n; i++) {
+          const cost = Math.abs(s.charCodeAt(i) - t.charCodeAt(i));
+          rowS.appendChild(makeCharCol(s[i], i, true, cost));
+          rowT.appendChild(makeCharCol(t[i], i, false, cost));
+        }
+      }
+
+      function makeCharCol(ch, i, isS, cost) {
+        const col = document.createElement("div");
+        col.className = "char-col";
+        col.id = `col-${isS ? "s" : "t"}-${i}`;
+
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.id = `box-${isS ? "s" : "t"}-${i}`;
+        box.textContent = ch;
+
+        if (!isS) {
+          const ptrL = document.createElement("span");
+          ptrL.className = "ptr-label ptr-L";
+          ptrL.id = `ptr-L-${i}`;
+          ptrL.textContent = "L";
+          ptrL.style.display = "none";
+          box.appendChild(ptrL);
+
+          const ptrR = document.createElement("span");
+          ptrR.className = "ptr-label ptr-R";
+          ptrR.id = `ptr-R-${i}`;
+          ptrR.textContent = "R";
+          ptrR.style.display = "none";
+          box.appendChild(ptrR);
+        }
+
+        col.appendChild(box);
+
+        if (!isS) {
+          const cl = document.createElement("div");
+          cl.className = "cost-label";
+          cl.id = `cost-${i}`;
+          cl.textContent = cost;
+          col.appendChild(cl);
+        }
+
+        const il = document.createElement("div");
+        il.className = "idx-label";
+        il.textContent = i;
+        col.appendChild(il);
+
+        return col;
+      }
+
+      // ─── Render a step ───────────────────────────────────────────
+      function renderStep(idx) {
+        if (!steps.length) return;
+        idx = Math.max(0, Math.min(idx, steps.length - 1));
+        stepIdx = idx;
+
+        const step = steps[idx];
+        const { left, right, cost, maxLength, action, note } = step;
+        const s = getS(),
+          t = getT(),
+          maxCost = getMaxCost();
+        const n = Math.min(s.length, t.length);
+
+        // Update char boxes
+        for (let i = 0; i < n; i++) {
+          const bS = document.getElementById(`box-s-${i}`);
+          const bT = document.getElementById(`box-t-${i}`);
+          const cl = document.getElementById(`cost-${i}`);
+          const pL = document.getElementById(`ptr-L-${i}`);
+          const pR = document.getElementById(`ptr-R-${i}`);
+          if (!bS || !bT) continue;
+
+          const inWin = i >= left && i <= right;
+          bS.className =
+            "char-box" +
+            (inWin ? " in-window" : "") +
+            (i === left && inWin ? " is-left" : "") +
+            (i === right && inWin ? " is-right" : "");
+          bT.className =
+            "char-box" +
+            (inWin ? " in-window" : "") +
+            (i === left && inWin ? " is-left" : "") +
+            (i === right && inWin ? " is-right" : "");
+
+          if (cl) cl.className = "cost-label" + (inWin ? " active" : "");
+          if (pL) pL.style.display = i === left && inWin ? "block" : "none";
+          if (pR)
+            pR.style.display =
+              i === right && inWin && right >= 0 ? "block" : "none";
+        }
+
+        // Stats
+        statLeft.textContent = left;
+        statRight.textContent = right >= 0 ? right : "—";
+        statCost.textContent = cost;
+        statCost.style.color = cost > maxCost ? "var(--red)" : "var(--green)";
+        statMax.textContent = maxLength;
+
+        // Note
+        noteBox.className =
+          "note-box " +
+          (action === "shrink"
+            ? "shrink"
+            : action === "update"
+              ? "update"
+              : "expand");
+        noteIcon.textContent =
+          action === "shrink" ? "⬅" : action === "update" ? "✓" : "➡";
+        noteText.textContent = note;
+
+        // Progress
+        const pct = steps.length > 1 ? (idx / (steps.length - 1)) * 100 : 0;
+        progressF.style.width = pct + "%";
+
+        // Counter
+        stepCtr.textContent = `${idx + 1} / ${steps.length}`;
+
+        // Result
+        if (idx === steps.length - 1) {
+          resultBox.classList.add("show");
+          resultVal.textContent = maxLength;
+        } else {
+          resultBox.classList.remove("show");
+        }
+      }
+
+      // ─── Getters ─────────────────────────────────────────────────
+      function getS() {
+        return inpS.value.replace(/\s/g, "").slice(0, 14);
+      }
+      function getT() {
+        const s = getS();
+        return inpT.value
+          .replace(/\s/g, "")
+          .slice(0, 14)
+          .padEnd(s.length, "a")
+          .slice(0, s.length);
+      }
+      function getMaxCost() {
+        return Math.max(0, parseInt(inpCost.value) || 0);
+      }
+
+      // ─── Init ────────────────────────────────────────────────────
+      function init() {
+        stopPlaying();
+        const s = getS(),
+          t = getT(),
+          mc = getMaxCost();
+        buildRows(s, t);
+        steps = computeSteps(s, t, mc);
+        stepIdx = 0;
+        resultBox.classList.remove("show");
+        if (steps.length) {
+          renderStep(0);
+        } else {
+          stepCtr.textContent = "0 / 0";
+          progressF.style.width = "0%";
+          noteText.textContent = "Enter valid strings to begin.";
+        }
+      }
+
+      function stopPlaying() {
+        playing = false;
+        clearInterval(intervalId);
+        btnPlay.textContent = "▶ Play";
+        btnPlay.classList.remove("paused");
+      }
+
+      function startPlaying() {
+        playing = true;
+        btnPlay.textContent = "⏸ Pause";
+        btnPlay.classList.add("paused");
+        intervalId = setInterval(() => {
+          if (stepIdx >= steps.length - 1) {
+            stopPlaying();
+            return;
+          }
+          renderStep(stepIdx + 1);
+        }, speedMs);
+      }
+
+      // ─── Event listeners ─────────────────────────────────────────
+      [inpS, inpT, inpCost].forEach((el) => el.addEventListener("input", init));
+
+      btnReset.addEventListener("click", () => {
+        stopPlaying();
+        renderStep(0);
+      });
+      btnPrev.addEventListener("click", () => {
+        stopPlaying();
+        renderStep(stepIdx - 1);
+      });
+      btnNext.addEventListener("click", () => {
+        stopPlaying();
+        renderStep(stepIdx + 1);
+      });
+
+      btnPlay.addEventListener("click", () => {
+        if (playing) {
+          stopPlaying();
+        } else {
+          if (stepIdx >= steps.length - 1) renderStep(0);
+          startPlaying();
+        }
+      });
+
+      speedSl.addEventListener("input", () => {
+        // slider 1-10, map to 1500ms-150ms
+        speedMs = Math.round(1650 - parseInt(speedSl.value) * 150);
+        if (playing) {
+          stopPlaying();
+          startPlaying();
+        }
+      });
+
+      // ─── Boot ────────────────────────────────────────────────────
+      init();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grumpy Bookstore Owner — DSA Notes</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --surface2: #1a1a26;
+        --border: #2a2a3d;
+        --accent: #7c6af7;
+        --accent2: #f7a26a;
+        --accent3: #6af7c4;
+        --text: #e8e8f0;
+        --muted: #6a6a8a;
+        --satisfied: #6af7c4;
+        --grumpy: #f76a8a;
+        --window: #7c6af7;
+        --code-bg: #0d0d18;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(124, 106, 247, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(124, 106, 247, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .glow-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .glow-orb-1 {
+        width: 400px;
+        height: 400px;
+        background: rgba(124, 106, 247, 0.12);
+        top: -100px;
+        right: -100px;
+      }
+      .glow-orb-2 {
+        width: 300px;
+        height: 300px;
+        background: rgba(106, 247, 196, 0.08);
+        bottom: 100px;
+        left: -50px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 48px;
+        animation: fadeUp 0.6s ease both;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(124, 106, 247, 0.15);
+        border: 1px solid rgba(124, 106, 247, 0.3);
+        color: var(--accent);
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 12px;
+      }
+
+      h1 span {
+        color: var(--accent);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 400;
+      }
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        border: 1px solid;
+      }
+      .badge-medium {
+        border-color: var(--accent2);
+        color: var(--accent2);
+        background: rgba(247, 162, 106, 0.08);
+      }
+      .badge-sliding {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(124, 106, 247, 0.08);
+      }
+      .badge-array {
+        border-color: var(--accent3);
+        color: var(--accent3);
+        background: rgba(106, 247, 196, 0.08);
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        animation: fadeUp 0.6s ease both;
+      }
+
+      .card-title {
+        font-size: 11px;
+        font-family: "Space Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card-title::before {
+        content: "";
+        display: block;
+        width: 3px;
+        height: 14px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+
+      /* Problem statement */
+      .problem-text {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #c0c0d8;
+      }
+
+      .highlight {
+        color: var(--accent2);
+        font-weight: 600;
+      }
+      .highlight-green {
+        color: var(--accent3);
+        font-weight: 600;
+      }
+      .highlight-purple {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      /* Interactive visualizer */
+      .visualizer-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        margin-bottom: 20px;
+        animation: fadeUp 0.6s ease both 0.1s;
+      }
+
+      /* Input controls */
+      .inputs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      @media (max-width: 600px) {
+        .inputs-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .input-label {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .input-field {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "Space Mono", monospace;
+        font-size: 13px;
+        padding: 10px 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+      }
+
+      .input-field:focus {
+        border-color: var(--accent);
+      }
+
+      .run-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 28px;
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.02em;
+        align-self: flex-end;
+      }
+
+      .run-btn:hover {
+        background: #9580ff;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(124, 106, 247, 0.3);
+      }
+      .run-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Array visualizer */
+      .viz-section {
+        margin-bottom: 24px;
+      }
+      .viz-label {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
+
+      .array-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .cell {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 16px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: default;
+        flex-shrink: 0;
+      }
+
+      .cell-index {
+        font-size: 9px;
+        font-weight: 400;
+        color: var(--muted);
+        position: absolute;
+        top: -18px;
+        font-family: "Space Mono", monospace;
+      }
+
+      .cell.customer {
+        background: rgba(106, 247, 196, 0.08);
+        border-color: rgba(106, 247, 196, 0.2);
+        color: var(--accent3);
+      }
+      .cell.customer.in-window {
+        background: rgba(124, 106, 247, 0.2);
+        border-color: var(--accent);
+        color: #fff;
+        box-shadow: 0 0 12px rgba(124, 106, 247, 0.3);
+      }
+
+      .cell.grumpy-cell {
+        width: 52px;
+        height: 32px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .cell.grumpy-cell.is-grumpy {
+        background: rgba(247, 106, 138, 0.15);
+        border-color: rgba(247, 106, 138, 0.4);
+        color: var(--grumpy);
+      }
+      .cell.grumpy-cell.not-grumpy {
+        background: rgba(106, 247, 196, 0.08);
+        border-color: rgba(106, 247, 196, 0.2);
+        color: var(--satisfied);
+      }
+
+      .window-bracket {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(124, 106, 247, 0.05);
+        border: 1px dashed rgba(124, 106, 247, 0.25);
+        transition: all 0.4s ease;
+      }
+
+      .window-indicator {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+
+      /* Step controls */
+      .step-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .step-btn {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 18px;
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .step-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .step-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .step-display {
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+        flex: 1;
+        text-align: center;
+      }
+
+      /* Stats panel */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .stat-box {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        transition: all 0.3s;
+      }
+
+      .stat-box.highlight-stat {
+        border-color: var(--accent);
+        background: rgba(124, 106, 247, 0.08);
+      }
+
+      .stat-key {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+      }
+
+      .stat-val {
+        font-family: "Space Mono", monospace;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        transition: all 0.3s;
+      }
+
+      .stat-val.green {
+        color: var(--satisfied);
+      }
+      .stat-val.purple {
+        color: var(--accent);
+      }
+      .stat-val.orange {
+        color: var(--accent2);
+      }
+
+      /* Log output */
+      .log-box {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin-top: 16px;
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        line-height: 1.8;
+        max-height: 160px;
+        overflow-y: auto;
+        color: var(--muted);
+      }
+
+      .log-box::-webkit-scrollbar {
+        width: 4px;
+      }
+      .log-box::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .log-box::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      .log-line {
+        transition: color 0.2s;
+      }
+      .log-line.active {
+        color: var(--accent3);
+      }
+      .log-line .log-kw {
+        color: var(--accent);
+      }
+      .log-line .log-val {
+        color: var(--accent2);
+      }
+      .log-line .log-dim {
+        color: #3a3a5a;
+      }
+
+      /* Algorithm steps */
+      .algo-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .algo-step {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 14px 16px;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        transition: all 0.3s;
+      }
+
+      .algo-step.active-step {
+        border-color: var(--accent);
+        background: rgba(124, 106, 247, 0.08);
+      }
+
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(124, 106, 247, 0.15);
+        border: 1px solid rgba(124, 106, 247, 0.3);
+        color: var(--accent);
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .algo-step.active-step .step-num {
+        background: var(--accent);
+        color: white;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+      .step-title {
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+      .step-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* Code block */
+      .code-card {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        animation: fadeUp 0.6s ease both 0.2s;
+      }
+
+      .code-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .code-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .code-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .dot-r {
+        background: #f76a8a;
+      }
+      .dot-y {
+        background: var(--accent2);
+      }
+      .dot-g {
+        background: var(--accent3);
+      }
+
+      .code-lang {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      pre {
+        padding: 20px 24px;
+        overflow-x: auto;
+        font-family: "Space Mono", monospace;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #c8c8e8;
+      }
+
+      .kw {
+        color: #f76a8a;
+      }
+      .fn {
+        color: #7c6af7;
+      }
+      .var {
+        color: #6af7c4;
+      }
+      .num {
+        color: #f7a26a;
+      }
+      .cm {
+        color: #4a4a6a;
+        font-style: italic;
+      }
+      .str {
+        color: #f7de6a;
+      }
+
+      /* Complexity */
+      .complexity-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .complexity-item {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+      }
+      .complexity-label {
+        font-size: 11px;
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .complexity-val {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--accent3);
+        font-family: "Space Mono", monospace;
+      }
+
+      /* Key insight */
+      .insight-box {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 106, 247, 0.1),
+          rgba(106, 247, 196, 0.05)
+        );
+        border: 1px solid rgba(124, 106, 247, 0.25);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        animation: fadeUp 0.6s ease both 0.3s;
+      }
+
+      .insight-icon {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+      .insight-title {
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 6px;
+        color: var(--accent);
+      }
+      .insight-text {
+        font-size: 14px;
+        color: #b0b0cc;
+        line-height: 1.6;
+      }
+
+      /* Error */
+      .error-msg {
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--grumpy);
+        background: rgba(247, 106, 138, 0.08);
+        border: 1px solid rgba(247, 106, 138, 0.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-top: 10px;
+        display: none;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .pop {
+        animation: pop 0.3s ease;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 28px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="tag">📚 Leetcode #1052</div>
+        <h1>Grumpy <span>Bookstore</span> Owner</h1>
+        <div class="subtitle">Sliding Window · Prefix Optimization</div>
+        <div class="badges">
+          <span class="badge badge-medium">Medium</span>
+          <span class="badge badge-sliding">Sliding Window</span>
+          <span class="badge badge-array">Array</span>
+        </div>
+      </div>
+
+      <!-- Problem Card -->
+      <div class="card" style="animation-delay: 0s">
+        <div class="card-title">Problem Statement</div>
+        <p class="problem-text">
+          A bookstore owner has an array
+          <span class="highlight-green">customers[]</span> where each element is
+          customers visiting at minute <em>i</em>. The owner is grumpy at times
+          indicated by <span class="highlight">grumpy[]</span> (1 = grumpy, 0 =
+          not grumpy). When grumpy, customers are <em>not</em> satisfied. The
+          owner can use a secret technique for
+          <span class="highlight-purple">minutes</span> consecutive minutes to
+          suppress grumpiness. <br /><br />
+          Return the <strong>maximum number of customers</strong> that can be
+          satisfied.
+        </p>
+      </div>
+
+      <!-- Key Insight -->
+      <div class="insight-box">
+        <div class="insight-icon">💡</div>
+        <div class="insight-title">Core Insight</div>
+        <div class="insight-text">
+          Split the problem into two parts: (1) customers already satisfied
+          <em>regardless</em> of the technique (grumpy[i]=0), and (2) find the
+          <strong>sliding window</strong> of length <code>minutes</code> that
+          recovers the most <em>additional</em> customers from grumpy moments.
+          These two parts are independent — compute them separately, then add.
+        </div>
+      </div>
+
+      <!-- Interactive Visualizer -->
+      <div class="visualizer-card">
+        <div class="card-title">Interactive Visualizer</div>
+
+        <div class="inputs-grid">
+          <div class="input-group" style="grid-column: 1/-1">
+            <label class="input-label"
+              >customers[] — visitors each minute</label
+            >
+            <input
+              class="input-field"
+              id="inp-customers"
+              value="1,0,1,2,1,1,7,5"
+              placeholder="e.g. 1,0,1,2,1,1,7,5"
+            />
+          </div>
+          <div class="input-group" style="grid-column: 1/-1">
+            <label class="input-label"
+              >grumpy[] — 1=grumpy, 0=calm (must match length)</label
+            >
+            <input
+              class="input-field"
+              id="inp-grumpy"
+              value="0,1,0,1,0,1,0,1"
+              placeholder="e.g. 0,1,0,1,0,1,0,1"
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">minutes — window size</label>
+            <input
+              class="input-field"
+              id="inp-minutes"
+              type="number"
+              value="3"
+              min="1"
+            />
+          </div>
+          <div class="input-group" style="justify-content: flex-end">
+            <label class="input-label">&nbsp;</label>
+            <button class="run-btn" onclick="initViz()">
+              ▶ Run Visualization
+            </button>
+          </div>
+        </div>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <!-- Visualization area -->
+        <div id="viz-area" style="display: none">
+          <hr class="divider" style="margin: 0 0 20px" />
+
+          <div class="viz-section">
+            <div class="viz-label">customers[]</div>
+            <div class="array-row" id="row-customers"></div>
+          </div>
+
+          <div class="viz-section" style="margin-top: 20px">
+            <div class="viz-label">grumpy[]</div>
+            <div class="array-row" id="row-grumpy"></div>
+          </div>
+
+          <div class="viz-section" style="margin-top: 20px">
+            <div class="window-indicator" id="window-indicator">
+              🪟 Current window: indices 0 – 2
+            </div>
+            <div class="window-bracket" id="row-window"></div>
+          </div>
+
+          <!-- Step controls -->
+          <div class="step-controls">
+            <button
+              class="step-btn"
+              id="btn-prev"
+              onclick="stepViz(-1)"
+              disabled
+            >
+              ← Prev
+            </button>
+            <button class="step-btn" id="btn-next" onclick="stepViz(1)">
+              Next →
+            </button>
+            <div class="step-display" id="step-display">Step 1 / 1</div>
+            <button class="step-btn" onclick="autoPlay()" id="btn-auto">
+              ▶ Auto
+            </button>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-key">Base Satisfied</div>
+              <div class="stat-val green" id="stat-base">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-key">Window Gain</div>
+              <div class="stat-val purple" id="stat-gain">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-key">Max Gain</div>
+              <div class="stat-val orange" id="stat-maxgain">0</div>
+            </div>
+            <div class="stat-box highlight-stat">
+              <div class="stat-key">Total Result</div>
+              <div class="stat-val" id="stat-total">—</div>
+            </div>
+          </div>
+
+          <!-- Log -->
+          <div class="log-box" id="log-box"></div>
+        </div>
+      </div>
+
+      <!-- Algorithm Steps -->
+      <div class="card" style="animation-delay: 0.15s">
+        <div class="card-title">Algorithm Walkthrough</div>
+        <div class="algo-steps">
+          <div class="algo-step" id="astep-1">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Compute Base Satisfaction</div>
+              <div class="step-desc">
+                Loop through all indices. Wherever <code>grumpy[i] === 0</code>,
+                add <code>customers[i]</code> to <code>baseSatisfied</code>.
+                These customers are always happy regardless of the technique.
+              </div>
+            </div>
+          </div>
+          <div class="algo-step" id="astep-2">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Initialize First Window</div>
+              <div class="step-desc">
+                Slide a window of size <code>minutes</code> starting at index 0.
+                Sum up <code>customers[i]</code> where
+                <code>grumpy[i] === 1</code> — these are the extra customers
+                we'd recover by using the technique here.
+              </div>
+            </div>
+          </div>
+          <div class="algo-step" id="astep-3">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Slide the Window</div>
+              <div class="step-desc">
+                For each new position, add the incoming element (if grumpy) and
+                remove the outgoing element (if grumpy). Track
+                <code>maxGain = Math.max(maxGain, windowGain)</code> at every
+                step.
+              </div>
+            </div>
+          </div>
+          <div class="algo-step" id="astep-4">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Return Result</div>
+              <div class="step-desc">
+                The answer is <code>baseSatisfied + maxGain</code>. The best
+                window position gives us the most bonus customers from the
+                technique.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Block -->
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-dots">
+            <div class="code-dot dot-r"></div>
+            <div class="code-dot dot-y"></div>
+            <div class="code-dot dot-g"></div>
+          </div>
+          <span class="code-lang">JavaScript</span>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">maxSatisfied</span> = <span class="kw">function</span>(<span class="var">customers</span>, <span class="var">grumpy</span>, <span class="var">minutes</span>) {
+    <span class="cm">// ① Always-satisfied customers (grumpy[i] === 0)</span>
+    <span class="kw">let</span> <span class="var">baseSatisfied</span> = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">customers</span>.length; <span class="var">i</span>++) {
+        <span class="kw">if</span> (<span class="var">grumpy</span>[<span class="var">i</span>] === <span class="num">0</span>) <span class="var">baseSatisfied</span> += <span class="var">customers</span>[<span class="var">i</span>];
+    }
+
+    <span class="cm">// ② First window: how many grumpy customers we'd save</span>
+    <span class="kw">let</span> <span class="var">windowGain</span> = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">minutes</span>; <span class="var">i</span>++) {
+        <span class="kw">if</span> (<span class="var">grumpy</span>[<span class="var">i</span>] === <span class="num">1</span>) <span class="var">windowGain</span> += <span class="var">customers</span>[<span class="var">i</span>];
+    }
+
+    <span class="kw">let</span> <span class="var">maxGain</span> = <span class="var">windowGain</span>;
+
+    <span class="cm">// ③ Slide window: add new, remove old</span>
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="var">minutes</span>; <span class="var">i</span> &lt; <span class="var">customers</span>.length; <span class="var">i</span>++) {
+        <span class="kw">if</span> (<span class="var">grumpy</span>[<span class="var">i</span>] === <span class="num">1</span>) <span class="var">windowGain</span> += <span class="var">customers</span>[<span class="var">i</span>];
+        <span class="kw">if</span> (<span class="var">grumpy</span>[<span class="var">i</span> - <span class="var">minutes</span>] === <span class="num">1</span>) <span class="var">windowGain</span> -= <span class="var">customers</span>[<span class="var">i</span> - <span class="var">minutes</span>];
+        <span class="var">maxGain</span> = Math.<span class="fn">max</span>(<span class="var">maxGain</span>, <span class="var">windowGain</span>);
+    }
+
+    <span class="cm">// ④ Base + best window bonus</span>
+    <span class="kw">return</span> <span class="var">baseSatisfied</span> + <span class="var">maxGain</span>;
+};</pre>
+      </div>
+
+      <!-- Complexity -->
+      <div class="card" style="animation-delay: 0.25s">
+        <div class="card-title">Complexity Analysis</div>
+        <div class="complexity-grid">
+          <div class="complexity-item">
+            <div class="complexity-label">Time</div>
+            <div class="complexity-val">O(n)</div>
+          </div>
+          <div class="complexity-item">
+            <div class="complexity-label">Space</div>
+            <div class="complexity-val">O(1)</div>
+          </div>
+        </div>
+        <p
+          style="
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 14px;
+            line-height: 1.6;
+          "
+        >
+          Two linear passes: one to compute base satisfaction, one for the
+          sliding window. No extra data structures needed — just a few counters.
+          Optimal for this problem.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      let steps = [];
+      let currentStep = 0;
+      let autoTimer = null;
+
+      function parseInput() {
+        const cStr = document.getElementById("inp-customers").value;
+        const gStr = document.getElementById("inp-grumpy").value;
+        const minutes = parseInt(document.getElementById("inp-minutes").value);
+
+        const customers = cStr
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n));
+        const grumpy = gStr
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n));
+
+        const err = document.getElementById("error-msg");
+
+        if (customers.length === 0) {
+          showErr("customers[] cannot be empty.");
+          return null;
+        }
+        if (customers.length !== grumpy.length) {
+          showErr(
+            `Length mismatch: customers has ${customers.length} items, grumpy has ${grumpy.length}.`,
+          );
+          return null;
+        }
+        if (grumpy.some((v) => v !== 0 && v !== 1)) {
+          showErr("grumpy[] must contain only 0 or 1.");
+          return null;
+        }
+        if (isNaN(minutes) || minutes < 1 || minutes > customers.length) {
+          showErr(`minutes must be between 1 and ${customers.length}.`);
+          return null;
+        }
+
+        err.style.display = "none";
+        return { customers, grumpy, minutes };
+      }
+
+      function showErr(msg) {
+        const err = document.getElementById("error-msg");
+        err.textContent = "⚠ " + msg;
+        err.style.display = "block";
+      }
+
+      function buildSteps(customers, grumpy, minutes) {
+        const s = [];
+        let baseSatisfied = 0;
+
+        // Phase 1: base
+        for (let i = 0; i < customers.length; i++) {
+          if (grumpy[i] === 0) baseSatisfied += customers[i];
+        }
+
+        s.push({
+          phase: 1,
+          windowStart: -1,
+          windowEnd: -1,
+          windowGain: 0,
+          maxGain: 0,
+          baseSatisfied,
+          log: `① Computed baseSatisfied = ${baseSatisfied} (sum of customers where not grumpy)`,
+        });
+
+        // Phase 2: first window
+        let windowGain = 0;
+        for (let i = 0; i < minutes; i++) {
+          if (grumpy[i] === 1) windowGain += customers[i];
+        }
+        let maxGain = windowGain;
+        s.push({
+          phase: 2,
+          windowStart: 0,
+          windowEnd: minutes - 1,
+          windowGain,
+          maxGain,
+          baseSatisfied,
+          log: `② First window [0–${minutes - 1}]: windowGain = ${windowGain}, maxGain = ${maxGain}`,
+        });
+
+        // Phase 3: sliding
+        for (let i = minutes; i < customers.length; i++) {
+          const added = grumpy[i] === 1 ? customers[i] : 0;
+          const removed =
+            grumpy[i - minutes] === 1 ? customers[i - minutes] : 0;
+          windowGain += added - removed;
+          const prevMax = maxGain;
+          maxGain = Math.max(maxGain, windowGain);
+          const note = maxGain > prevMax ? ` 🎯 New max!` : "";
+          s.push({
+            phase: 3,
+            windowStart: i - minutes + 1,
+            windowEnd: i,
+            windowGain,
+            maxGain,
+            baseSatisfied,
+            log: `③ i=${i}: +${added} −${removed} → windowGain=${windowGain}, maxGain=${maxGain}${note}`,
+          });
+        }
+
+        // Phase 4: result
+        s.push({
+          phase: 4,
+          windowStart: -1,
+          windowEnd: -1,
+          windowGain,
+          maxGain,
+          baseSatisfied,
+          log: `④ Result: baseSatisfied(${baseSatisfied}) + maxGain(${maxGain}) = ${baseSatisfied + maxGain}`,
+          done: true,
+        });
+
+        return s;
+      }
+
+      let _customers, _grumpy, _minutes;
+
+      function initViz() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          document.getElementById("btn-auto").textContent = "▶ Auto";
+        }
+
+        const parsed = parseInput();
+        if (!parsed) return;
+        _customers = parsed.customers;
+        _grumpy = parsed.grumpy;
+        _minutes = parsed.minutes;
+
+        steps = buildSteps(_customers, _grumpy, _minutes);
+        currentStep = 0;
+
+        document.getElementById("viz-area").style.display = "block";
+        renderArrays();
+        renderStep(0);
+      }
+
+      function renderArrays() {
+        // Customers row
+        const rowC = document.getElementById("row-customers");
+        rowC.innerHTML = "";
+        _customers.forEach((v, i) => {
+          const el = document.createElement("div");
+          el.className = "cell customer";
+          el.id = `cell-c-${i}`;
+          el.innerHTML = `<span class="cell-index">${i}</span>${v}`;
+          rowC.appendChild(el);
+        });
+
+        // Grumpy row
+        const rowG = document.getElementById("row-grumpy");
+        rowG.innerHTML = "";
+        _grumpy.forEach((v, i) => {
+          const el = document.createElement("div");
+          el.className = `cell grumpy-cell ${v === 1 ? "is-grumpy" : "not-grumpy"}`;
+          el.id = `cell-g-${i}`;
+          el.innerHTML = v === 1 ? "😠" : "😊";
+          rowG.appendChild(el);
+        });
+      }
+
+      function renderStep(idx) {
+        const step = steps[idx];
+
+        // Update cells
+        _customers.forEach((_, i) => {
+          const c = document.getElementById(`cell-c-${i}`);
+          c.classList.remove("in-window");
+          if (
+            step.windowStart >= 0 &&
+            i >= step.windowStart &&
+            i <= step.windowEnd
+          ) {
+            c.classList.add("in-window");
+          }
+        });
+
+        // Window display
+        const rowW = document.getElementById("row-window");
+        rowW.innerHTML = "";
+        const indicator = document.getElementById("window-indicator");
+
+        if (step.windowStart >= 0) {
+          indicator.textContent = `🪟 Window: indices ${step.windowStart} – ${step.windowEnd}`;
+          for (let i = step.windowStart; i <= step.windowEnd; i++) {
+            const el = document.createElement("div");
+            el.className = "cell customer in-window";
+            el.style.width = "52px";
+            el.style.height = "52px";
+            el.innerHTML = `<span class="cell-index">${i}</span>${_customers[i]}`;
+            rowW.appendChild(el);
+          }
+        } else {
+          indicator.textContent = step.done
+            ? "✅ Sliding window complete"
+            : "🔄 Computing base satisfaction...";
+          rowW.innerHTML =
+            '<span style="font-family:Space Mono,monospace;font-size:12px;color:var(--muted);padding:8px">—</span>';
+        }
+
+        // Stats
+        animateStat("stat-base", step.baseSatisfied);
+        animateStat("stat-gain", step.windowGain);
+        animateStat("stat-maxgain", step.maxGain);
+        animateStat(
+          "stat-total",
+          step.done ? step.baseSatisfied + step.maxGain : "—",
+        );
+
+        // Algo step highlight
+        for (let p = 1; p <= 4; p++) {
+          document
+            .getElementById(`astep-${p}`)
+            .classList.toggle("active-step", step.phase === p);
+        }
+
+        // Log
+        addLog(step.log, idx);
+
+        // Controls
+        document.getElementById("btn-prev").disabled = idx === 0;
+        document.getElementById("btn-next").disabled = idx === steps.length - 1;
+        document.getElementById("step-display").textContent =
+          `Step ${idx + 1} / ${steps.length}`;
+      }
+
+      function animateStat(id, val) {
+        const el = document.getElementById(id);
+        if (el.textContent !== String(val)) {
+          el.textContent = val;
+          el.classList.remove("pop");
+          void el.offsetWidth;
+          el.classList.add("pop");
+        }
+      }
+
+      let logLines = [];
+      function addLog(msg, idx) {
+        const box = document.getElementById("log-box");
+        if (idx === 0) {
+          logLines = [];
+          box.innerHTML = "";
+        }
+        if (!logLines.includes(msg)) {
+          logLines.push(msg);
+          const line = document.createElement("div");
+          line.className = "log-line active";
+          line.textContent = msg;
+          box.appendChild(line);
+          // dim previous
+          box.querySelectorAll(".log-line").forEach((l, i) => {
+            if (i < box.querySelectorAll(".log-line").length - 1)
+              l.classList.remove("active");
+          });
+          box.scrollTop = box.scrollHeight;
+        }
+      }
+
+      function stepViz(dir) {
+        currentStep = Math.max(
+          0,
+          Math.min(steps.length - 1, currentStep + dir),
+        );
+        renderStep(currentStep);
+      }
+
+      function autoPlay() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          document.getElementById("btn-auto").textContent = "▶ Auto";
+          return;
+        }
+        if (currentStep >= steps.length - 1) currentStep = 0;
+        document.getElementById("btn-auto").textContent = "⏸ Pause";
+        autoTimer = setInterval(() => {
+          if (currentStep >= steps.length - 1) {
+            clearInterval(autoTimer);
+            autoTimer = null;
+            document.getElementById("btn-auto").textContent = "▶ Auto";
+            return;
+          }
+          currentStep++;
+          renderStep(currentStep);
+        }, 900);
+      }
+
+      // Run on load
+      window.onload = () => initViz();
+    </script>
+  </body>
+</html>
