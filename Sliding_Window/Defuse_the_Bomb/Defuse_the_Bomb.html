@@ -1,0 +1,1777 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Defuse The Bomb — DSA Notes</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --surface2: #1a1a24;
+        --border: #2a2a3a;
+        --accent: #00ff9d;
+        --accent2: #ff3864;
+        --accent3: #7b61ff;
+        --accent4: #ffb800;
+        --text: #e8e8f0;
+        --text-muted: #6b6b85;
+        --window-add: #00ff9d;
+        --window-remove: #ff3864;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 52px;
+        animation: fadeDown 0.6s ease;
+      }
+      .header .tag {
+        font-size: 11px;
+        letter-spacing: 3px;
+        color: var(--accent);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .header h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(32px, 5vw, 56px);
+        font-weight: 800;
+        line-height: 1.05;
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 14px;
+      }
+      .header .subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* Complexity badges */
+      .badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+      .badge {
+        padding: 5px 14px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid;
+      }
+      .badge.time {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(0, 255, 157, 0.07);
+      }
+      .badge.space {
+        border-color: var(--accent3);
+        color: var(--accent3);
+        background: rgba(123, 97, 255, 0.07);
+      }
+      .badge.pattern {
+        border-color: var(--accent4);
+        color: var(--accent4);
+        background: rgba(255, 184, 0, 0.07);
+      }
+
+      /* Section headings */
+      .section-title {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .section-title .num {
+        color: var(--accent);
+        font-size: 13px;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 28px;
+      }
+
+      /* Problem statement */
+      .problem-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 640px) {
+        .problem-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .p-card {
+        background: var(--surface2);
+        border-radius: 10px;
+        padding: 18px;
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+      .p-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+      .p-card.k-pos::before {
+        background: var(--accent);
+      }
+      .p-card.k-neg::before {
+        background: var(--accent2);
+      }
+      .p-card.k-zero::before {
+        background: var(--text-muted);
+      }
+      .p-card .case-label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .p-card.k-pos .case-label {
+        color: var(--accent);
+      }
+      .p-card.k-neg .case-label {
+        color: var(--accent2);
+      }
+      .p-card.k-zero .case-label {
+        color: var(--text-muted);
+      }
+      .p-card p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .p-card strong {
+        color: var(--text);
+      }
+
+      /* Algorithm steps */
+      .steps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .step {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 14px 16px;
+        background: var(--surface2);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        transition: border-color 0.3s;
+      }
+      .step:hover {
+        border-color: var(--accent3);
+      }
+      .step .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(123, 97, 255, 0.15);
+        border: 1px solid var(--accent3);
+        color: var(--accent3);
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .step p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .step strong {
+        color: var(--text);
+      }
+
+      /* ── VISUALIZER ── */
+      .viz-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 24px;
+        align-items: flex-end;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .input-group label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .input-group input {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        padding: 10px 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+        min-width: 160px;
+      }
+      .input-group input:focus {
+        border-color: var(--accent);
+      }
+
+      .btn {
+        padding: 10px 22px;
+        border-radius: 8px;
+        border: none;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #000;
+      }
+      .btn-primary:hover {
+        filter: brightness(1.15);
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--accent3);
+        border: 1px solid var(--accent3);
+      }
+      .btn-secondary:hover {
+        background: rgba(123, 97, 255, 0.1);
+      }
+      .btn-step {
+        background: transparent;
+        color: var(--accent4);
+        border: 1px solid var(--accent4);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-step:hover:not(:disabled) {
+        background: rgba(255, 184, 0, 0.1);
+        transform: translateY(-1px);
+      }
+      .btn-step:active:not(:disabled) {
+        transform: scale(0.96);
+      }
+      .btn-step .step-flash {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 184, 0, 0.18);
+        opacity: 0;
+        border-radius: 8px;
+        transition: opacity 0.15s;
+      }
+      .btn-step.flash .step-flash {
+        opacity: 1;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .speed-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .speed-group label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .speed-group select {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        padding: 10px 14px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      /* Array display */
+      .array-section {
+        margin-bottom: 28px;
+      }
+      .array-label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+      }
+      .array-wrapper {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .cell {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .cell-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        background: var(--surface2);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .cell-box::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .cell-box.in-window {
+        border-color: var(--accent);
+        background: rgba(0, 255, 157, 0.12);
+        box-shadow: 0 0 18px rgba(0, 255, 157, 0.25);
+        transform: translateY(-4px) scale(1.05);
+        color: #fff;
+      }
+      .cell-box.adding {
+        border-color: var(--accent);
+        background: rgba(0, 255, 157, 0.3);
+        box-shadow: 0 0 28px rgba(0, 255, 157, 0.5);
+        transform: translateY(-8px) scale(1.12);
+      }
+      .cell-box.removing {
+        border-color: var(--accent2);
+        background: rgba(255, 56, 100, 0.2);
+        box-shadow: 0 0 18px rgba(255, 56, 100, 0.3);
+        transform: translateY(-4px) scale(0.95);
+      }
+      .cell-box.current-i {
+        border-color: var(--accent4);
+        background: rgba(255, 184, 0, 0.12);
+        box-shadow: 0 0 14px rgba(255, 184, 0, 0.2);
+      }
+      .cell-index {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+      }
+      .cell-tag {
+        position: absolute;
+        top: -22px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        font-weight: 700;
+        padding: 2px 5px;
+        border-radius: 3px;
+        white-space: nowrap;
+      }
+      .tag-i {
+        background: rgba(255, 184, 0, 0.2);
+        color: var(--accent4);
+        border: 1px solid rgba(255, 184, 0, 0.4);
+      }
+      .tag-add {
+        background: rgba(0, 255, 157, 0.15);
+        color: var(--accent);
+        border: 1px solid rgba(0, 255, 157, 0.4);
+      }
+      .tag-rem {
+        background: rgba(255, 56, 100, 0.15);
+        color: var(--accent2);
+        border: 1px solid rgba(255, 56, 100, 0.4);
+      }
+
+      /* Result row */
+      .result-cell {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        background: var(--surface2);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-muted);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .result-cell.filled {
+        border-color: var(--accent3);
+        background: rgba(123, 97, 255, 0.12);
+        color: #fff;
+        box-shadow: 0 0 14px rgba(123, 97, 255, 0.2);
+        transform: scale(1.08);
+      }
+      .result-cell.latest {
+        border-color: var(--accent3);
+        box-shadow: 0 0 24px rgba(123, 97, 255, 0.5);
+        transform: scale(1.14);
+      }
+
+      /* Info panel */
+      .info-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      @media (max-width: 500px) {
+        .info-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .info-item {
+        background: var(--surface2);
+        border-radius: 8px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+      }
+      .info-item .info-label {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .info-item .info-val {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .info-val.green {
+        color: var(--accent);
+      }
+      .info-val.purple {
+        color: var(--accent3);
+      }
+      .info-val.yellow {
+        color: var(--accent4);
+      }
+
+      /* Log */
+      .log-box {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        min-height: 56px;
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        transition: all 0.3s;
+      }
+      .log-box .highlight {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .log-box .highlight-red {
+        color: var(--accent2);
+        font-weight: 600;
+      }
+      .log-box .highlight-yellow {
+        color: var(--accent4);
+        font-weight: 600;
+      }
+      .log-box .highlight-purple {
+        color: var(--accent3);
+        font-weight: 600;
+      }
+
+      /* Walkthrough steps indicator */
+      .step-progress {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .step-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+        transition: all 0.3s;
+      }
+      .step-dot.active {
+        background: var(--accent);
+        box-shadow: 0 0 8px var(--accent);
+      }
+      .step-dot.done {
+        background: var(--accent3);
+      }
+
+      /* Code block */
+      .code-block {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+      .code-block .kw {
+        color: var(--accent2);
+      }
+      .code-block .fn {
+        color: #61dafb;
+      }
+      .code-block .str {
+        color: var(--accent4);
+      }
+      .code-block .cm {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+      .code-block .hl {
+        color: var(--accent);
+      }
+      .code-block .num-lit {
+        color: #c678dd;
+      }
+
+      /* Legend */
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+      }
+
+      /* Playback controls */
+      .playback {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes popIn {
+        0% {
+          transform: scale(0.7);
+          opacity: 0;
+        }
+        70% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes pulse-green {
+        0%,
+        100% {
+          box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 28px rgba(0, 255, 157, 0.7);
+        }
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 32px 0;
+      }
+
+      /* Tab nav */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+        background: var(--surface2);
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        width: fit-content;
+      }
+      .tab-btn {
+        padding: 8px 18px;
+        border-radius: 7px;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        color: #000;
+        font-weight: 700;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* presets */
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .preset-btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        color: var(--text-muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .preset-btn:hover {
+        border-color: var(--accent3);
+        color: var(--accent3);
+      }
+
+      .error-msg {
+        color: var(--accent2);
+        font-size: 12px;
+        margin-top: 6px;
+        display: none;
+      }
+      .error-msg.show {
+        display: block;
+      }
+
+      .mode-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        margin-left: 8px;
+        transition: all 0.3s;
+      }
+      .mode-indicator.auto {
+        background: rgba(0, 255, 157, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(0, 255, 157, 0.3);
+      }
+      .mode-indicator.manual {
+        background: rgba(255, 184, 0, 0.1);
+        color: var(--accent4);
+        border: 1px solid rgba(255, 184, 0, 0.3);
+      }
+      .mode-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: pulse-dot 1.2s ease-in-out infinite;
+      }
+      .mode-indicator.auto .mode-dot {
+        background: var(--accent);
+      }
+      .mode-indicator.manual .mode-dot {
+        background: var(--accent4);
+        animation: none;
+      }
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.6);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="tag">// DSA Notes — Sliding Window</div>
+        <h1>Defuse<br />The Bomb</h1>
+        <div class="subtitle">
+          LeetCode #1652 · Circular array · Sliding window · O(n)
+        </div>
+        <div class="badges">
+          <span class="badge time">⏱ Time: O(n)</span>
+          <span class="badge space">📦 Space: O(n)</span>
+          <span class="badge pattern">🪟 Sliding Window</span>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('notes')">
+          Notes
+        </button>
+        <button class="tab-btn" onclick="switchTab('viz')">Visualizer</button>
+        <button class="tab-btn" onclick="switchTab('code')">
+          Optimal Code
+        </button>
+      </div>
+
+      <!-- TAB: NOTES -->
+      <div class="tab-panel active" id="tab-notes">
+        <div class="section-title"><span class="num">01</span> Problem</div>
+        <div class="card">
+          <p
+            style="
+              font-size: 14px;
+              color: var(--text-muted);
+              line-height: 1.8;
+              margin-bottom: 20px;
+            "
+          >
+            Given a circular array
+            <strong style="color: var(--text)">code</strong> and integer
+            <strong style="color: var(--text)">k</strong>, replace each element
+            with the sum of the
+            <strong style="color: var(--text)">next</strong> or
+            <strong style="color: var(--text)">previous</strong> k elements
+            (treating the array as circular).
+          </p>
+          <div class="problem-grid">
+            <div class="p-card k-pos">
+              <div class="case-label">k &gt; 0</div>
+              <p>
+                Replace <strong>code[i]</strong> with sum of
+                <strong>next k</strong> elements → window is
+                <strong>[i+1 … i+k]</strong>
+              </p>
+            </div>
+            <div class="p-card k-neg">
+              <div class="case-label">k &lt; 0</div>
+              <p>
+                Replace <strong>code[i]</strong> with sum of
+                <strong>prev |k|</strong> elements → window is
+                <strong>[i+k … i-1]</strong>
+              </p>
+            </div>
+            <div class="p-card k-zero">
+              <div class="case-label">k = 0</div>
+              <p>
+                Every element becomes <strong>0</strong>. Trivial base case.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span class="num">02</span> Naive vs Optimal
+        </div>
+        <div class="card">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div>
+              <div
+                style="
+                  color: var(--accent2);
+                  font-size: 12px;
+                  letter-spacing: 2px;
+                  margin-bottom: 10px;
+                "
+              >
+                ✗ BRUTE FORCE — O(n·k)
+              </div>
+              <p
+                style="
+                  font-size: 13px;
+                  color: var(--text-muted);
+                  line-height: 1.7;
+                "
+              >
+                For each index i, loop k times summing elements. The window is
+                recomputed from scratch every single time — wasteful.
+              </p>
+            </div>
+            <div>
+              <div
+                style="
+                  color: var(--accent);
+                  font-size: 12px;
+                  letter-spacing: 2px;
+                  margin-bottom: 10px;
+                "
+              >
+                ✓ SLIDING WINDOW — O(n)
+              </div>
+              <p
+                style="
+                  font-size: 13px;
+                  color: var(--text-muted);
+                  line-height: 1.7;
+                "
+              >
+                Compute window once. Each step:
+                <strong style="color: var(--text)"
+                  >subtract one leaving element, add one entering
+                  element</strong
+                >. Window slides in O(1) per step.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span class="num">03</span> Algorithm Walkthrough
+        </div>
+        <div class="card">
+          <div class="steps-list">
+            <div class="step">
+              <div class="step-num">1</div>
+              <p>
+                Handle <strong>k = 0</strong> immediately → return all zeros.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <p>
+                Determine initial window bounds for index 0:<br />
+                k &gt; 0 → <strong>start = 1, end = k</strong><br />
+                k &lt; 0 → <strong>start = n+k, end = n-1</strong>
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <p>
+                Sum the initial window using modulo for circular wrapping:
+                <strong>code[i % n]</strong>
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <p>Record <strong>res[0] = windowSum</strong></p>
+            </div>
+            <div class="step">
+              <div class="step-num">5</div>
+              <p>
+                For each i from 1 to n-1:<br />
+                → <strong>Subtract code[start % n]</strong> (element leaving
+                window)<br />
+                → <strong>Add code[(end+1) % n]</strong> (element entering
+                window)<br />
+                → Advance start and end by 1<br />
+                → Record res[i] = windowSum
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span class="num">04</span> Key Insight — Unified Window
+        </div>
+        <div class="card">
+          <p
+            style="
+              font-size: 13px;
+              color: var(--text-muted);
+              line-height: 1.8;
+              margin-bottom: 16px;
+            "
+          >
+            The elegant insight is that
+            <strong style="color: var(--text)"
+              >negative k is just a left window</strong
+            >
+            — expressible as a right-shifted start index. Instead of writing two
+            separate loops, map both cases to the same
+            <code style="color: var(--accent)">start/end</code> pointer logic:
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div
+              style="
+                background: var(--surface2);
+                padding: 14px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+              "
+            >
+              <div
+                style="
+                  color: var(--accent);
+                  font-size: 11px;
+                  letter-spacing: 2px;
+                  margin-bottom: 8px;
+                "
+              >
+                K POSITIVE
+              </div>
+              <code style="font-size: 13px">start = 1<br />end = k</code>
+            </div>
+            <div
+              style="
+                background: var(--surface2);
+                padding: 14px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+              "
+            >
+              <div
+                style="
+                  color: var(--accent2);
+                  font-size: 11px;
+                  letter-spacing: 2px;
+                  margin-bottom: 8px;
+                "
+              >
+                K NEGATIVE
+              </div>
+              <code style="font-size: 13px"
+                >start = n + k<br />end = n - 1</code
+              >
+            </div>
+          </div>
+          <p
+            style="
+              font-size: 13px;
+              color: var(--text-muted);
+              line-height: 1.8;
+              margin-top: 16px;
+            "
+          >
+            After that, the sliding loop is
+            <strong style="color: var(--text)">identical for both cases</strong
+            >. This eliminates the duplicated code your original solution had.
+          </p>
+        </div>
+      </div>
+
+      <!-- TAB: VISUALIZER -->
+      <div class="tab-panel" id="tab-viz">
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px">
+            <span class="num">INPUT</span> Test Case
+          </div>
+
+          <div class="presets">
+            <span
+              style="
+                font-size: 11px;
+                color: var(--text-muted);
+                letter-spacing: 1px;
+                align-self: center;
+              "
+              >PRESETS:</span
+            >
+            <button class="preset-btn" onclick="loadPreset([5, 7, 1, 4], 3)">
+              k=3 positive
+            </button>
+            <button class="preset-btn" onclick="loadPreset([2, 4, 9, 3], -2)">
+              k=-2 negative
+            </button>
+            <button class="preset-btn" onclick="loadPreset([1, 2, 3, 4], 0)">
+              k=0 zeros
+            </button>
+            <button
+              class="preset-btn"
+              onclick="loadPreset([10, 5, 7, 7, 3, 2], -3)"
+            >
+              longer arr
+            </button>
+            <button class="preset-btn" onclick="loadPreset([1, 2, 3, 4, 5], 2)">
+              5 elements
+            </button>
+          </div>
+
+          <div class="viz-controls">
+            <div class="input-group">
+              <label>Array (comma separated)</label>
+              <input
+                type="text"
+                id="inp-arr"
+                value="5,7,1,4"
+                placeholder="e.g. 1,2,3,4"
+              />
+              <div class="error-msg" id="err-arr">
+                Invalid array — use numbers only
+              </div>
+            </div>
+            <div class="input-group">
+              <label>K value</label>
+              <input
+                type="number"
+                id="inp-k"
+                value="3"
+                style="min-width: 80px; max-width: 100px"
+              />
+              <div class="error-msg" id="err-k">
+                |k| must be &lt; array length
+              </div>
+            </div>
+            <div class="speed-group">
+              <label>Speed</label>
+              <select id="speed-sel">
+                <option value="900">Slow</option>
+                <option value="500" selected>Normal</option>
+                <option value="250">Fast</option>
+                <option value="80">Turbo</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="btn-run" onclick="startViz()">
+              ▶ Run
+            </button>
+            <button
+              class="btn btn-step"
+              id="btn-step"
+              onclick="stepViz()"
+              disabled
+            >
+              <span class="step-flash"></span>⏭ Step
+            </button>
+            <button
+              class="btn btn-secondary"
+              id="btn-reset"
+              onclick="resetViz()"
+            >
+              ↺ Reset
+            </button>
+          </div>
+
+          <!-- Info bar -->
+          <div class="info-bar">
+            <div class="info-item">
+              <div class="info-label">Window Sum</div>
+              <div class="info-val green" id="disp-sum">—</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Current i</div>
+              <div class="info-val yellow" id="disp-i">—</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Step</div>
+              <div class="info-val purple" id="disp-step">—</div>
+            </div>
+          </div>
+
+          <!-- Progress dots -->
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+              margin-bottom: 16px;
+            "
+          >
+            <div
+              class="step-progress"
+              id="step-dots"
+              style="margin-bottom: 0; flex: 1"
+            ></div>
+            <span
+              class="mode-indicator"
+              id="mode-indicator"
+              style="display: none"
+            ></span>
+          </div>
+
+          <!-- Log -->
+          <div class="log-box" id="log-box">
+            Press <strong style="color: var(--accent)">▶ Run</strong> to start
+            the animation.
+          </div>
+        </div>
+
+        <!-- Array visualization -->
+        <div class="card">
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: var(--accent)"></div>
+              In window
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-dot"
+                style="
+                  background: rgba(0, 255, 157, 0.6);
+                  border: 2px solid var(--accent);
+                "
+              ></div>
+              Entering (+)
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-dot"
+                style="
+                  background: rgba(255, 56, 100, 0.4);
+                  border: 2px solid var(--accent2);
+                "
+              ></div>
+              Leaving (−)
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-dot"
+                style="
+                  background: rgba(255, 184, 0, 0.3);
+                  border: 2px solid var(--accent4);
+                "
+              ></div>
+              Current i
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-dot"
+                style="
+                  background: rgba(123, 97, 255, 0.3);
+                  border: 2px solid var(--accent3);
+                "
+              ></div>
+              Result
+            </div>
+          </div>
+
+          <div class="array-section">
+            <div class="array-label">Input Array (circular)</div>
+            <div class="array-wrapper" id="arr-display"></div>
+          </div>
+
+          <div class="array-section">
+            <div class="array-label">Result Array</div>
+            <div class="array-wrapper" id="res-display"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CODE -->
+      <div class="tab-panel" id="tab-code">
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px">
+            <span class="num">OPTIMAL</span> Solution
+          </div>
+          <div class="code-block" id="code-display">
+            <span class="cm"
+              >// Unified sliding window — O(n) time · O(n) space</span
+            >
+            <span class="kw">var</span> <span class="fn">decrypt</span> =
+            <span class="kw">function</span>(code, k) {
+            <span class="kw">const</span> n = code.length;
+            <span class="kw">const</span> res =
+            <span class="kw">new</span> Array(n).<span class="fn">fill</span
+            >(<span class="num-lit">0</span>);
+
+            <span class="cm">// Base case — k=0, all zeros</span>
+            <span class="kw">if</span> (k === <span class="num-lit">0</span>)
+            <span class="kw">return</span> res;
+
+            <span class="cm">// Determine initial window for index 0:</span>
+            <span class="cm"
+              >// k > 0 → window = [1 … k] (next k elements)</span
+            >
+            <span class="cm"
+              >// k < 0 → window = [n+k … n-1] (prev |k| elements)</span
+            >
+            <span class="kw">let</span> [start, end] = k >
+            <span class="num-lit">0</span> ? [<span class="num-lit">1</span>, k]
+            : [n + k, n - <span class="num-lit">1</span>];
+
+            <span class="cm"
+              >// Build initial window sum (circular via modulo)</span
+            >
+            <span class="kw">let</span> windowSum =
+            <span class="num-lit">0</span>; <span class="kw">for</span> (<span
+              class="kw"
+              >let</span
+            >
+            i = start; i &lt;= end; i++) { windowSum += code[i % n]; }
+
+            <span class="cm">// Slide the window across all n positions</span>
+            <span class="kw">for</span> (<span class="kw">let</span> i =
+            <span class="num-lit">0</span>; i &lt; n; i++) { res[i] = windowSum;
+            windowSum -= code[start % n];
+            <span class="cm">// ← remove leaving element</span> windowSum +=
+            code[(end + <span class="num-lit">1</span>) % n];
+            <span class="cm">// ← add entering element</span>
+
+            start++; end++; }
+
+            <span class="kw">return</span> res; };
+          </div>
+
+          <div style="margin-top: 24px">
+            <div class="section-title">
+              <span class="num">WHY</span> This Beats Your Original
+            </div>
+            <div class="steps-list">
+              <div class="step">
+                <div class="step-num">→</div>
+                <p>
+                  Your solution had
+                  <strong>two completely separate loops</strong> for k&gt;0 and
+                  k&lt;0. The optimal has <strong>one unified loop</strong>.
+                </p>
+              </div>
+              <div class="step">
+                <div class="step-num">→</div>
+                <p>
+                  The trick: negative k's left-window maps to a
+                  <strong>right-shifted start</strong> index (<code
+                    style="color: var(--accent)"
+                    >n + k</code
+                  >), so the sliding logic is identical.
+                </p>
+              </div>
+              <div class="step">
+                <div class="step-num">→</div>
+                <p>
+                  Both have the <strong>same O(n) complexity</strong> — the
+                  improvement is purely in
+                  <strong>code clarity and maintainability</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /container -->
+
+    <script>
+      // ─── Tab switching ───────────────────────────────
+      function switchTab(id) {
+        document.querySelectorAll(".tab-btn").forEach((b, i) => {
+          b.classList.toggle("active", ["notes", "viz", "code"][i] === id);
+        });
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document.getElementById("tab-" + id).classList.add("active");
+      }
+
+      // ─── Presets ─────────────────────────────────────
+      function loadPreset(arr, k) {
+        switchTab("viz");
+        document.getElementById("inp-arr").value = arr.join(",");
+        document.getElementById("inp-k").value = k;
+        resetViz();
+      }
+
+      // ─── Parse inputs ─────────────────────────────────
+      function parseInputs() {
+        const rawArr = document.getElementById("inp-arr").value;
+        const rawK = document.getElementById("inp-k").value;
+        const errArr = document.getElementById("err-arr");
+        const errK = document.getElementById("err-k");
+        errArr.classList.remove("show");
+        errK.classList.remove("show");
+
+        const arr = rawArr
+          .split(",")
+          .map((s) => s.trim())
+          .map(Number);
+        if (arr.some(isNaN) || arr.length < 1) {
+          errArr.classList.add("show");
+          return null;
+        }
+
+        const k = parseInt(rawK);
+        if (isNaN(k)) {
+          errK.classList.add("show");
+          return null;
+        }
+        if (Math.abs(k) >= arr.length && k !== 0) {
+          errK.classList.add("show");
+          return null;
+        }
+
+        return { arr, k };
+      }
+
+      // ─── Render helpers ────────────────────────────────
+      let currentArr = [],
+        currentK = 0;
+      let animRunning = false;
+      let timeouts = [];
+
+      function renderArray(arr, containerId, type = "input") {
+        const el = document.getElementById(containerId);
+        el.innerHTML = "";
+        arr.forEach((v, i) => {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.innerHTML = `<div class="cell-box" id="${type}-cell-${i}">${v}</div><div class="cell-index">[${i}]</div>`;
+          el.appendChild(cell);
+        });
+      }
+
+      function renderResult(n) {
+        const el = document.getElementById("res-display");
+        el.innerHTML = "";
+        for (let i = 0; i < n; i++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.innerHTML = `<div class="result-cell" id="res-cell-${i}">?</div><div class="cell-index">[${i}]</div>`;
+          el.appendChild(cell);
+        }
+      }
+
+      function buildDots(n) {
+        const el = document.getElementById("step-dots");
+        el.innerHTML = "";
+        for (let i = 0; i < n; i++) {
+          const d = document.createElement("div");
+          d.className = "step-dot";
+          d.id = `dot-${i}`;
+          el.appendChild(d);
+        }
+      }
+
+      function clearCellStyles(arr) {
+        arr.forEach((_, i) => {
+          const c = document.getElementById(`input-cell-${i}`);
+          if (c) c.className = "cell-box";
+          const parent = c ? c.parentElement : null;
+          if (parent)
+            parent.querySelectorAll(".cell-tag").forEach((t) => t.remove());
+        });
+      }
+
+      function setLog(html) {
+        document.getElementById("log-box").innerHTML = html;
+      }
+      function setInfo(sum, i, step) {
+        document.getElementById("disp-sum").textContent =
+          sum !== null ? sum : "—";
+        document.getElementById("disp-i").textContent = i !== null ? i : "—";
+        document.getElementById("disp-step").textContent =
+          step !== null ? step : "—";
+      }
+
+      function addTag(parentEl, type, text) {
+        const t = document.createElement("span");
+        t.className = `cell-tag tag-${type}`;
+        t.textContent = text;
+        parentEl.style.position = "relative";
+        parentEl.appendChild(t);
+      }
+
+      function delay(ms) {
+        return new Promise((r) => timeouts.push(setTimeout(r, ms)));
+      }
+
+      function setMode(mode) {
+        // mode: null | 'auto' | 'manual'
+        const el = document.getElementById("mode-indicator");
+        if (!mode) {
+          el.style.display = "none";
+          return;
+        }
+        el.style.display = "inline-flex";
+        el.className = `mode-indicator ${mode}`;
+        el.innerHTML = `<span class="mode-dot"></span>${mode === "auto" ? "AUTO PLAY" : "STEP MODE"}`;
+      }
+
+      // ─── Step engine state ────────────────────────────
+      // Each "step" is a plain object describing what to render.
+      // We pre-compute all steps upfront so both auto and manual can share the same logic.
+      let steps = []; // pre-computed step descriptors
+      let stepIndex = -1; // which step we're on (-1 = not started)
+
+      function buildSteps(arr, k) {
+        const n = arr.length;
+        const out = [];
+
+        if (k === 0) {
+          out.push({ type: "k0" });
+          return out;
+        }
+
+        let start = k > 0 ? 1 : n + k;
+        let end = k > 0 ? k : n - 1;
+
+        // Step 0: show initial window
+        out.push({ type: "init", start, end, n });
+
+        // Compute initial sum
+        let windowSum = 0;
+        for (let i = start; i <= end; i++) windowSum += arr[i % n];
+
+        for (let i = 0; i < n; i++) {
+          // Sub-step A: show i + window + record result
+          out.push({ type: "record", i, windowSum, start, end, n });
+
+          if (i < n - 1) {
+            const removing = start % n;
+            const adding = (end + 1) % n;
+            // Sub-step B: show remove/add transition
+            out.push({
+              type: "slide",
+              i,
+              removing,
+              adding,
+              arr,
+              oldSum: windowSum,
+              newSum: windowSum - arr[removing] + arr[adding],
+              start,
+              end,
+              n,
+            });
+            windowSum = windowSum - arr[removing] + arr[adding];
+            start++;
+            end++;
+          }
+        }
+
+        out.push({ type: "done", n });
+        return out;
+      }
+
+      function applyStep(step, arr) {
+        const n = arr.length;
+
+        if (step.type === "k0") {
+          clearCellStyles(arr);
+          setInfo(0, "—", "k=0");
+          setLog(
+            '<span class="highlight">k = 0</span> → every element becomes <span class="highlight">0</span>.',
+          );
+          for (let i = 0; i < n; i++) {
+            const rc = document.getElementById(`res-cell-${i}`);
+            if (rc) {
+              rc.textContent = 0;
+              rc.className = "result-cell filled";
+            }
+            const d = document.getElementById(`dot-${i}`);
+            if (d) d.className = "step-dot done";
+          }
+          return;
+        }
+
+        if (step.type === "init") {
+          clearCellStyles(arr);
+          for (let i = step.start; i <= step.end; i++) {
+            const c = document.getElementById(`input-cell-${i % step.n}`);
+            if (c) c.className = "cell-box in-window";
+          }
+          // compute sum for display
+          let s = 0;
+          for (let i = step.start; i <= step.end; i++) s += arr[i % step.n];
+          setInfo(s, 0, "init");
+          setLog(
+            `<span class="highlight-yellow">Initial window</span> for i=0: indices <span class="highlight">[${step.start}…${step.end}]</span> (mod ${step.n}) = <span class="highlight">${s}</span>`,
+          );
+          return;
+        }
+
+        if (step.type === "record") {
+          clearCellStyles(arr);
+          // current i cell
+          const ci = document.getElementById(`input-cell-${step.i}`);
+          if (ci) {
+            ci.className = "cell-box current-i";
+            addTag(ci.parentElement, "i", `i=${step.i}`);
+          }
+          // window cells
+          for (let w = step.start; w <= step.end; w++) {
+            const wc = document.getElementById(`input-cell-${w % step.n}`);
+            if (wc && wc !== ci) wc.className = "cell-box in-window";
+          }
+          // result
+          const rc = document.getElementById(`res-cell-${step.i}`);
+          if (rc) {
+            rc.textContent = step.windowSum;
+            rc.className = "result-cell filled latest";
+          }
+          if (step.i > 0) {
+            const prev = document.getElementById(`res-cell-${step.i - 1}`);
+            if (prev) prev.className = "result-cell filled";
+          }
+          // dots
+          document.getElementById(`dot-${step.i}`).className =
+            "step-dot active";
+          setInfo(step.windowSum, step.i, `${step.i + 1}/${step.n}`);
+          setLog(
+            `<span class="highlight-yellow">i = ${step.i}</span> → window sum = <span class="highlight">${step.windowSum}</span> → <span class="highlight-purple">res[${step.i}] = ${step.windowSum}</span>`,
+          );
+          return;
+        }
+
+        if (step.type === "slide") {
+          // Keep current-i highlight, show remove/add on top
+          clearCellStyles(arr);
+          const ci = document.getElementById(`input-cell-${step.i}`);
+          if (ci) {
+            ci.className = "cell-box current-i";
+            addTag(ci.parentElement, "i", `i=${step.i}`);
+          }
+          // keep window except leaving/entering
+          for (let w = step.start; w <= step.end; w++) {
+            const idx = w % step.n;
+            if (idx === step.removing) continue;
+            const wc = document.getElementById(`input-cell-${idx}`);
+            if (wc && wc !== ci) wc.className = "cell-box in-window";
+          }
+          const remCell = document.getElementById(
+            `input-cell-${step.removing}`,
+          );
+          const addCell = document.getElementById(`input-cell-${step.adding}`);
+          if (remCell) {
+            remCell.className = "cell-box removing";
+            addTag(remCell.parentElement, "rem", `−${step.arr[step.removing]}`);
+          }
+          if (addCell) {
+            addCell.className = "cell-box adding";
+            addTag(addCell.parentElement, "add", `+${step.arr[step.adding]}`);
+          }
+          // dot done for this i
+          document.getElementById(`dot-${step.i}`).className = "step-dot done";
+          setInfo(step.newSum, step.i + 1, `${step.i + 2}/${step.n}`);
+          setLog(
+            `<span class="highlight-red">−Remove</span> code[${step.removing}]=${step.arr[step.removing]} &nbsp;|&nbsp; <span class="highlight">+Add</span> code[${step.adding}]=${step.arr[step.adding]} &nbsp;→ new sum = <span class="highlight">${step.newSum}</span>`,
+          );
+          return;
+        }
+
+        if (step.type === "done") {
+          clearCellStyles(arr);
+          const lastR = document.getElementById(`res-cell-${step.n - 1}`);
+          if (lastR) lastR.className = "result-cell filled";
+          const results = [];
+          for (let i = 0; i < step.n; i++) {
+            const rc = document.getElementById(`res-cell-${i}`);
+            results.push(rc ? rc.textContent : "?");
+          }
+          setLog(
+            `✅ Done! Result: <span class="highlight">[${results.join(", ")}]</span>`,
+          );
+          setInfo("—", "—", "done");
+        }
+      }
+
+      // ─── Reset ────────────────────────────────────────
+      function resetViz() {
+        timeouts.forEach(clearTimeout);
+        timeouts = [];
+        animRunning = false;
+        steps = [];
+        stepIndex = -1;
+
+        document.getElementById("btn-run").disabled = false;
+        document.getElementById("btn-step").disabled = false;
+        setMode(null);
+
+        const p = parseInputs();
+        if (!p) return;
+        const { arr, k } = p;
+        currentArr = arr;
+        currentK = k;
+
+        renderArray(arr, "arr-display", "input");
+        renderResult(arr.length);
+        buildDots(arr.length);
+        setInfo(null, null, null);
+        setLog(
+          'Press <strong style="color:var(--accent)">▶ Run</strong> for auto-play or <strong style="color:var(--accent4)">⏭ Step</strong> to go one step at a time.',
+        );
+      }
+
+      // ─── Step button ─────────────────────────────────
+      function stepViz() {
+        if (animRunning) return; // don't allow stepping during auto-play
+
+        const p = parseInputs();
+        if (!p) return;
+        const { arr, k } = p;
+
+        // First press: initialise
+        if (stepIndex === -1) {
+          currentArr = arr;
+          currentK = k;
+          renderArray(arr, "arr-display", "input");
+          renderResult(arr.length);
+          buildDots(arr.length);
+          steps = buildSteps(arr, k);
+          stepIndex = 0;
+          document.getElementById("btn-run").disabled = true;
+          setMode("manual");
+        }
+
+        if (stepIndex >= steps.length) return; // already finished
+
+        // Flash the button
+        const btn = document.getElementById("btn-step");
+        btn.classList.add("flash");
+        setTimeout(() => btn.classList.remove("flash"), 200);
+
+        applyStep(steps[stepIndex], arr);
+        stepIndex++;
+
+        if (stepIndex >= steps.length) {
+          btn.disabled = true;
+          setMode("manual"); // keep indicator but done
+        }
+      }
+
+      // ─── Auto-play ────────────────────────────────────
+      async function startViz() {
+        if (animRunning) return;
+        const p = parseInputs();
+        if (!p) return;
+        const { arr, k } = p;
+        currentArr = arr;
+        currentK = k;
+
+        // Reset to clean state first
+        steps = [];
+        stepIndex = -1;
+        renderArray(arr, "arr-display", "input");
+        renderResult(arr.length);
+        buildDots(arr.length);
+
+        animRunning = true;
+        document.getElementById("btn-run").disabled = true;
+        document.getElementById("btn-step").disabled = true;
+        setMode("auto");
+
+        const allSteps = buildSteps(arr, k);
+        const spd = parseInt(document.getElementById("speed-sel").value);
+
+        for (let s = 0; s < allSteps.length; s++) {
+          if (!animRunning) break;
+          applyStep(allSteps[s], arr);
+
+          // pacing: init/record get full delay, slide gets shorter, done is instant
+          const st = allSteps[s].type;
+          const ms =
+            st === "init"
+              ? spd
+              : st === "record"
+                ? spd * 0.9
+                : st === "slide"
+                  ? spd * 0.7
+                  : 0;
+          if (ms > 0) await delay(ms);
+        }
+
+        animRunning = false;
+        document.getElementById("btn-run").disabled = false;
+        document.getElementById("btn-step").disabled = true; // finished
+        setMode("auto");
+      }
+
+      // ─── Init ──────────────────────────────────────────
+      window.onload = () => {
+        resetViz();
+      };
+    </script>
+  </body>
+</html>
