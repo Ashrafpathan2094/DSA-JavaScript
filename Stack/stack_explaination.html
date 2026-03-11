@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stack Technique — LeetCode Mastery</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #12121a;
+        --surface2: #1a1a26;
+        --border: #2a2a3d;
+        --accent: #ff6b35;
+        --accent2: #00d4ff;
+        --accent3: #a855f7;
+        --green: #22c55e;
+        --yellow: #fbbf24;
+        --text: #e8e8f0;
+        --muted: #6b6b8a;
+        --card-h: 160px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      /* ── GRID BACKGROUND ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 107, 53, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 107, 53, 0.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .wrapper {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px 80px;
+      }
+
+      /* ── HERO ── */
+      .hero {
+        padding: 72px 0 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .hero-tag {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        color: var(--accent);
+        text-transform: uppercase;
+        border: 1px solid var(--accent);
+        padding: 4px 14px;
+        border-radius: 2px;
+        margin-bottom: 24px;
+        animation: fadeDown 0.6s ease both;
+      }
+      .hero h1 {
+        font-size: clamp(48px, 8vw, 96px);
+        font-weight: 800;
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+        animation: fadeDown 0.6s 0.1s ease both;
+      }
+      .hero h1 span {
+        color: var(--accent);
+      }
+      .hero p {
+        max-width: 600px;
+        margin: 20px auto 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.7;
+        animation: fadeDown 0.6s 0.2s ease both;
+      }
+
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── SECTION HEADERS ── */
+      .sec-label {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.25em;
+        color: var(--accent2);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .sec-title {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 32px;
+      }
+      section {
+        margin-bottom: 72px;
+      }
+
+      /* ── WHAT IS STACK ── */
+      .concept-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .concept-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        transition:
+          border-color 0.3s,
+          transform 0.3s;
+      }
+      .concept-card:hover {
+        border-color: var(--accent2);
+        transform: translateY(-3px);
+      }
+      .concept-card .icon {
+        font-size: 28px;
+        margin-bottom: 12px;
+      }
+      .concept-card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--accent2);
+      }
+      .concept-card p {
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .mono {
+        font-family: "Space Mono", monospace;
+      }
+
+      /* ── LIVE STACK VISUALIZER ── */
+      .visualizer-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 16px;
+      }
+      .viz-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+      }
+      .viz-input {
+        flex: 1;
+        min-width: 120px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: "Space Mono", monospace;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .viz-input:focus {
+        border-color: var(--accent);
+      }
+      .btn {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 8px;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.02em;
+      }
+      .btn-push {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-push:hover {
+        background: #ff8555;
+        transform: translateY(-1px);
+      }
+      .btn-pop {
+        background: var(--surface2);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .btn-pop:hover {
+        background: rgba(255, 107, 53, 0.12);
+        transform: translateY(-1px);
+      }
+      .btn-peek {
+        background: var(--surface2);
+        color: var(--accent2);
+        border: 1px solid var(--accent2);
+      }
+      .btn-peek:hover {
+        background: rgba(0, 212, 255, 0.12);
+        transform: translateY(-1px);
+      }
+      .btn-clear {
+        background: var(--surface2);
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .btn-clear:hover {
+        border-color: var(--muted);
+        color: var(--text);
+        transform: translateY(-1px);
+      }
+
+      .stack-area {
+        display: flex;
+        gap: 40px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+      .stack-container {
+        flex: 1;
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .stack-rail {
+        width: 140px;
+        min-height: 340px;
+        border-left: 3px solid var(--border);
+        border-right: 3px solid var(--border);
+        border-bottom: 3px solid var(--border);
+        border-radius: 0 0 10px 10px;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: stretch;
+        padding: 6px;
+        gap: 6px;
+        position: relative;
+        background: linear-gradient(
+          to top,
+          rgba(255, 107, 53, 0.04),
+          transparent
+        );
+      }
+      .stack-label {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 8px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .stack-item {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 12px;
+        text-align: center;
+        font-family: "Space Mono", monospace;
+        font-size: 14px;
+        position: relative;
+        transition: all 0.3s;
+      }
+      .stack-item.top-item {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 53, 0.25),
+          rgba(255, 107, 53, 0.1)
+        );
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .stack-item.new-item {
+        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      .stack-item.pop-item {
+        animation: slideOut 0.3s ease forwards;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-30px) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      @keyframes slideOut {
+        to {
+          opacity: 0;
+          transform: translateY(-40px) scale(0.7);
+        }
+      }
+      .top-arrow {
+        position: absolute;
+        right: -42px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        white-space: nowrap;
+      }
+      .stack-empty {
+        color: var(--muted);
+        font-size: 12px;
+        font-family: "Space Mono", monospace;
+        text-align: center;
+        padding: 20px;
+      }
+      .stack-info {
+        flex: 1;
+        min-width: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 8px;
+      }
+      .info-row {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .info-row .label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .info-row .value {
+        font-family: "Space Mono", monospace;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .info-row .value.accent {
+        color: var(--accent);
+      }
+      .log-box {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        flex: 1;
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.8;
+        max-height: 180px;
+        overflow-y: auto;
+      }
+      .log-box .log-line {
+        color: var(--text);
+      }
+      .log-box .log-line.push {
+        color: var(--green);
+      }
+      .log-box .log-line.pop {
+        color: var(--accent);
+      }
+      .log-box .log-line.peek {
+        color: var(--accent2);
+      }
+      .log-box .log-line.err {
+        color: var(--yellow);
+      }
+
+      /* ── ALGORITHM DEMOS ── */
+      .algo-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        padding: 8px 18px;
+        border-radius: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .tab-btn:hover:not(.active) {
+        border-color: var(--accent2);
+        color: var(--text);
+      }
+
+      .algo-panel {
+        display: none;
+      }
+      .algo-panel.active {
+        display: block;
+      }
+
+      .algo-demo {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+      }
+      .algo-demo h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .algo-demo .desc {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      /* Brackets demo */
+      .brackets-area {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .input-string {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+      }
+      .char-box {
+        width: 44px;
+        height: 48px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Space Mono", monospace;
+        font-size: 18px;
+        font-weight: 700;
+        border: 2px solid var(--border);
+        background: var(--surface2);
+        transition: all 0.4s;
+      }
+      .char-box.open-b {
+        border-color: var(--accent2);
+        color: var(--accent2);
+      }
+      .char-box.close-b {
+        border-color: var(--accent3);
+        color: var(--accent3);
+      }
+      .char-box.matched {
+        border-color: var(--green);
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--green);
+      }
+      .char-box.current {
+        border-color: var(--yellow);
+        background: rgba(251, 191, 36, 0.15);
+        color: var(--yellow);
+        transform: scale(1.12);
+      }
+      .char-box.error-b {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+      }
+
+      .mini-stack {
+        display: flex;
+        gap: 6px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        min-height: 60px;
+      }
+      .mini-item {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Space Mono", monospace;
+        font-size: 16px;
+        border: 2px solid var(--accent2);
+        color: var(--accent2);
+        background: rgba(0, 212, 255, 0.08);
+        animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes popUp {
+        from {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 14px;
+        margin-top: 12px;
+      }
+      .result-badge.valid {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+      .result-badge.invalid {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid #ef4444;
+      }
+      .result-badge.pending {
+        background: rgba(251, 191, 36, 0.15);
+        color: var(--yellow);
+        border: 1px solid var(--yellow);
+      }
+
+      .demo-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      /* Monotonic demo */
+      .bars-area {
+        display: flex;
+        gap: 6px;
+        align-items: flex-end;
+        margin-bottom: 20px;
+      }
+      .bar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .bar {
+        width: 40px;
+        border-radius: 4px 4px 0 0;
+        background: var(--surface2);
+        border: 2px solid var(--border);
+        transition: all 0.4s;
+        min-height: 20px;
+      }
+      .bar.active-bar {
+        border-color: var(--yellow);
+        background: rgba(251, 191, 36, 0.2);
+      }
+      .bar.result-bar {
+        border-color: var(--green);
+        background: rgba(34, 197, 94, 0.2);
+      }
+      .bar.popped-bar {
+        border-color: var(--accent);
+        background: rgba(255, 107, 53, 0.2);
+      }
+      .bar-val {
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .bar-idx {
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--border);
+      }
+
+      .ngr-results {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .ngr-chip {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+        transition: all 0.4s;
+      }
+      .ngr-chip.found {
+        border-color: var(--green);
+        color: var(--green);
+        background: rgba(34, 197, 94, 0.08);
+      }
+      .ngr-chip.none {
+        border-color: var(--muted);
+      }
+
+      /* ── TIPS & TRICKS ── */
+      .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .tip-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px;
+        transition:
+          border-color 0.3s,
+          transform 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .tip-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 2px 2px 0 0;
+      }
+      .tip-card.t1::before {
+        background: var(--accent);
+      }
+      .tip-card.t2::before {
+        background: var(--accent2);
+      }
+      .tip-card.t3::before {
+        background: var(--accent3);
+      }
+      .tip-card.t4::before {
+        background: var(--green);
+      }
+      .tip-card.t5::before {
+        background: var(--yellow);
+      }
+      .tip-card.t6::before {
+        background: #ec4899;
+      }
+      .tip-card:hover {
+        border-color: var(--accent2);
+        transform: translateY(-3px);
+      }
+      .tip-num {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .tip-card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .tip-card p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+      .tip-card code {
+        display: block;
+        margin-top: 10px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        color: var(--accent2);
+        line-height: 1.7;
+        white-space: pre;
+      }
+
+      /* ── PATTERNS TABLE ── */
+      .patterns-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .patterns-table th {
+        background: var(--surface2);
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+        font-family: "Space Mono", monospace;
+      }
+      .patterns-table td {
+        padding: 14px 18px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border);
+        line-height: 1.5;
+        vertical-align: top;
+      }
+      .patterns-table tr:last-child td {
+        border-bottom: none;
+      }
+      .patterns-table tr:hover td {
+        background: rgba(255, 107, 53, 0.04);
+      }
+      .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        margin-right: 4px;
+        margin-bottom: 2px;
+      }
+      .tag-e {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--green);
+      }
+      .tag-m {
+        background: rgba(251, 191, 36, 0.15);
+        color: var(--yellow);
+      }
+      .tag-h {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+      }
+      .tag-p {
+        background: rgba(168, 85, 247, 0.15);
+        color: var(--accent3);
+      }
+
+      /* ── COMPLEXITY BOX ── */
+      .complexity-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .complex-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px;
+      }
+      .complex-card h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        color: var(--accent2);
+      }
+      .complex-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+      .complex-row:last-child {
+        border-bottom: none;
+      }
+      .complex-row .op {
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+      }
+      .complex-row .big-o {
+        color: var(--green);
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+      }
+
+      /* scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--surface);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--muted);
+      }
+
+      @media (max-width: 640px) {
+        .concept-grid,
+        .complexity-grid {
+          grid-template-columns: 1fr;
+        }
+        .stack-area {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hero-tag">LeetCode Patterns</div>
+        <h1>STACK<br /><span>TECHNIQUE</span></h1>
+        <p>
+          A deep dive into one of the most powerful data structures in
+          competitive programming — with live animations, real examples, and
+          every trick you need.
+        </p>
+      </div>
+
+      <!-- WHAT IS A STACK -->
+      <section>
+        <div class="sec-label">01 — Fundamentals</div>
+        <div class="sec-title">What is a Stack?</div>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <div class="icon">📚</div>
+            <h3>LIFO Principle</h3>
+            <p>
+              <strong>Last In, First Out.</strong> Like a stack of plates — you
+              always add and remove from the top. The last element pushed is the
+              first one popped.
+            </p>
+          </div>
+          <div class="concept-card">
+            <div class="icon">⚡</div>
+            <h3>Core Operations</h3>
+            <p>
+              <span class="mono">push(x)</span> — add to top &nbsp;|&nbsp;
+              <span class="mono">pop()</span> — remove top &nbsp;|&nbsp;
+              <span class="mono">peek()</span> — view top &nbsp;|&nbsp;
+              <span class="mono">isEmpty()</span> — check empty. All O(1).
+            </p>
+          </div>
+          <div class="concept-card">
+            <div class="icon">🔍</div>
+            <h3>When to Use</h3>
+            <p>
+              Whenever you need to <strong>remember previous state</strong> to
+              handle future elements — matching brackets, tracking history,
+              monotonic sequences, or DFS traversal.
+            </p>
+          </div>
+          <div class="concept-card">
+            <div class="icon">🧠</div>
+            <h3>Mental Model</h3>
+            <p>
+              Think of a stack as an <strong>undo buffer</strong>. You store
+              things you haven't fully "resolved" yet, and pop them when you
+              find their match or answer.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE VISUALIZER -->
+      <section>
+        <div class="sec-label">02 — Interactive</div>
+        <div class="sec-title">Live Stack Visualizer</div>
+        <div class="visualizer-card">
+          <div class="viz-controls">
+            <input
+              class="viz-input"
+              id="pushInput"
+              type="text"
+              placeholder="Enter value…"
+              maxlength="8"
+            />
+            <button class="btn btn-push" onclick="doPush()">Push ↑</button>
+            <button class="btn btn-pop" onclick="doPop()">Pop ↓</button>
+            <button class="btn btn-peek" onclick="doPeek()">Peek 👁</button>
+            <button class="btn btn-clear" onclick="doClear()">Clear</button>
+          </div>
+          <div class="stack-area">
+            <div class="stack-container">
+              <div class="stack-label">← TOP (last in, first out)</div>
+              <div class="stack-rail" id="stackRail">
+                <div class="stack-empty" id="emptyMsg">stack is empty</div>
+              </div>
+            </div>
+            <div class="stack-info">
+              <div class="info-row">
+                <span class="label">Size</span
+                ><span class="value accent" id="sizeVal">0</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Top</span
+                ><span class="value" id="topVal">—</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Bottom</span
+                ><span class="value" id="botVal">—</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Last op</span
+                ><span class="value" id="lastOp">—</span>
+              </div>
+              <div class="log-box" id="logBox">
+                <div class="log-line">// operation log</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALGORITHM DEMOS -->
+      <section>
+        <div class="sec-label">03 — Algorithms</div>
+        <div class="sec-title">Classic Stack Problems</div>
+
+        <div class="algo-tabs">
+          <button class="tab-btn active" onclick="showTab('brackets')">
+            Valid Brackets
+          </button>
+          <button class="tab-btn" onclick="showTab('monotonic')">
+            Next Greater Element
+          </button>
+        </div>
+
+        <!-- VALID BRACKETS -->
+        <div class="algo-panel active" id="tab-brackets">
+          <div class="algo-demo">
+            <h3>Valid Parentheses</h3>
+            <div class="desc">
+              Given a string with brackets
+              <code
+                style="
+                  background: var(--surface2);
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  font-family: &quot;Space Mono&quot;, monospace;
+                "
+                >()[]{}</code
+              >, determine if it's valid. A stack stores unmatched opening
+              brackets — when we see a closing bracket we check if top matches.
+            </div>
+            <div class="brackets-area">
+              <div>
+                <div class="sec-label" style="margin-bottom: 8px">
+                  INPUT STRING
+                </div>
+                <div class="input-string" id="charBoxes"></div>
+              </div>
+              <div>
+                <div class="sec-label" style="margin-bottom: 8px">
+                  STACK STATE
+                </div>
+                <div class="mini-stack" id="miniStack"></div>
+              </div>
+              <div id="bracketResult"></div>
+            </div>
+            <div class="demo-controls">
+              <button class="btn btn-push" onclick="runBrackets()">
+                ▶ Animate
+              </button>
+              <button class="btn btn-clear" onclick="resetBrackets()">
+                Reset
+              </button>
+              <select
+                id="bracketPreset"
+                style="
+                  background: var(--surface2);
+                  border: 1px solid var(--border);
+                  color: var(--text);
+                  padding: 10px 14px;
+                  border-radius: 8px;
+                  font-family: &quot;Syne&quot;, sans-serif;
+                  font-size: 13px;
+                  cursor: pointer;
+                  outline: none;
+                "
+              >
+                <option value="()[]{}">( ) [ ] { } ✅ Valid</option>
+                <option value="([)]">( [ ) ] ❌ Invalid</option>
+                <option value="{[]}">{ [ ] } ✅ Valid</option>
+                <option value="(((">( ( ( ❌ Invalid</option>
+                <option value="()[{}()]">( ) [ { } ( ) ] ✅ Valid</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEXT GREATER ELEMENT -->
+        <div class="algo-panel" id="tab-monotonic">
+          <div class="algo-demo">
+            <h3>Next Greater Element (Monotonic Stack)</h3>
+            <div class="desc">
+              For each element in the array, find the next element that is
+              greater. A <strong>monotonic decreasing stack</strong> keeps track
+              of elements waiting for their answer. When we find a greater
+              element, we pop and resolve them.
+            </div>
+            <div>
+              <div class="sec-label" style="margin-bottom: 8px">ARRAY</div>
+              <div class="bars-area" id="barsArea"></div>
+              <div
+                class="sec-label"
+                style="margin-bottom: 8px; margin-top: 16px"
+              >
+                RESULTS: next greater element for each index
+              </div>
+              <div class="ngr-results" id="ngrResults"></div>
+              <div class="sec-label" style="margin-bottom: 8px">
+                STACK (waiting for answer)
+              </div>
+              <div class="mini-stack" id="monoStack"></div>
+            </div>
+            <div class="demo-controls">
+              <button class="btn btn-push" onclick="runMonotonic()">
+                ▶ Animate
+              </button>
+              <button class="btn btn-clear" onclick="resetMonotonic()">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TIPS & TRICKS -->
+      <section>
+        <div class="sec-label">04 — Tips & Tricks</div>
+        <div class="sec-title">Master the Stack Technique</div>
+        <div class="tips-grid">
+          <div class="tip-card t1">
+            <div class="tip-num">TIP 01</div>
+            <h3>The "Unresolved" Pattern</h3>
+            <p>
+              Push elements onto the stack when you can't yet determine their
+              answer. Pop them off when you finally find the information you
+              need.
+            </p>
+            <code
+              >// waiting for closing bracket stack.push(char) // found it →
+              resolve if match(stack.top, char): stack.pop()</code
+            >
+          </div>
+
+          <div class="tip-card t2">
+            <div class="tip-num">TIP 02</div>
+            <h3>Monotonic Stack</h3>
+            <p>
+              Maintain a stack in monotonically increasing or decreasing order.
+              When the order breaks, pop and record answers. Used for
+              "next/previous greater/smaller" problems.
+            </p>
+            <code
+              >for num in arr: while stack and stack[-1] &lt; num:
+              result[stack.pop()] = num stack.append(i)</code
+            >
+          </div>
+
+          <div class="tip-card t3">
+            <div class="tip-num">TIP 03</div>
+            <h3>Push Index, Not Value</h3>
+            <p>
+              Often you need both the value AND position. Push the index onto
+              the stack — you can always retrieve the value as
+              <span class="mono">arr[stack[-1]]</span>.
+            </p>
+            <code
+              >stack = [] # push indices for i, val in enumerate(arr): while
+              stack and arr[stack[-1]] &lt; val: idx = stack.pop() ans[idx] =
+              val stack.append(i)</code
+            >
+          </div>
+
+          <div class="tip-card t4">
+            <div class="tip-num">TIP 04</div>
+            <h3>Stack for DFS / Tree Traversal</h3>
+            <p>
+              Iterative DFS uses an explicit stack instead of recursion. This
+              avoids stack overflow on deep inputs and gives you fine-grained
+              control over traversal order.
+            </p>
+            <code
+              >stack = [root] while stack: node = stack.pop() # process node if
+              node.right: stack.append(node.right) if node.left:
+              stack.append(node.left)</code
+            >
+          </div>
+
+          <div class="tip-card t5">
+            <div class="tip-num">TIP 05</div>
+            <h3>Two-Stack Trick</h3>
+            <p>
+              Use two stacks to implement a queue (push stack + pop stack). Or
+              use a "min stack" — a second stack that tracks the running minimum
+              at each level.
+            </p>
+            <code
+              >class MinStack: def push(self, val): self.stack.append(val) mn =
+              min(val, self.mins[-1]) self.mins.append(mn)</code
+            >
+          </div>
+
+          <div class="tip-card t6">
+            <div class="tip-num">TIP 06</div>
+            <h3>Duplicate Element on Stack</h3>
+            <p>
+              Sometimes push the same element twice (e.g., for inorder traversal
+              simulation) to distinguish between "first visit" and "process now"
+              states. Use a flag or sentinel.
+            </p>
+            <code
+              >stack = [(root, False)] while stack: node, visited = stack.pop()
+              if visited: process(node) else: stack.append((node, True))
+              ...</code
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- PATTERNS TABLE -->
+      <section>
+        <div class="sec-label">05 — Problem Patterns</div>
+        <div class="sec-title">Stack Problem Categories</div>
+        <table class="patterns-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Key Idea</th>
+              <th>Examples</th>
+              <th>Difficulty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Matching / Validation</strong></td>
+              <td>Push opening symbols, pop on closing and verify match</td>
+              <td>Valid Parentheses, Decode String</td>
+              <td><span class="tag tag-e">Easy</span></td>
+            </tr>
+            <tr>
+              <td><strong>Next Greater / Smaller</strong></td>
+              <td>Monotonic stack; pop when current breaks order</td>
+              <td>Next Greater Element I/II, Daily Temperatures</td>
+              <td><span class="tag tag-m">Medium</span></td>
+            </tr>
+            <tr>
+              <td><strong>Histogram / Area</strong></td>
+              <td>Push indices, pop when height decreases to compute area</td>
+              <td>Largest Rectangle in Histogram, Trapping Rain Water</td>
+              <td><span class="tag tag-h">Hard</span></td>
+            </tr>
+            <tr>
+              <td><strong>Expression Evaluation</strong></td>
+              <td>Operand stack + operator stack, apply ops by precedence</td>
+              <td>Basic Calculator I/II, Evaluate RPN</td>
+              <td>
+                <span class="tag tag-m">Medium</span
+                ><span class="tag tag-h">Hard</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Iterative DFS / Tree</strong></td>
+              <td>Explicit stack replaces recursion for traversal</td>
+              <td>Binary Tree Inorder, Path Sum, Flatten BT</td>
+              <td><span class="tag tag-m">Medium</span></td>
+            </tr>
+            <tr>
+              <td><strong>Min / Max Stack</strong></td>
+              <td>Auxiliary stack tracks extremes at each level</td>
+              <td>Min Stack, Max Stack, Sliding Window Maximum</td>
+              <td><span class="tag tag-m">Medium</span></td>
+            </tr>
+            <tr>
+              <td><strong>String Manipulation</strong></td>
+              <td>Push chars, pop to reverse/remove duplicates</td>
+              <td>Remove Duplicates, Simplify Path, Backspace Compare</td>
+              <td>
+                <span class="tag tag-e">Easy</span
+                ><span class="tag tag-m">Medium</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Monotone + Prefix</strong></td>
+              <td>Stack stores prefix info for range queries</td>
+              <td>Sum of Subarray Minimums, Max Width Ramp</td>
+              <td><span class="tag tag-h">Hard</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- COMPLEXITY -->
+      <section>
+        <div class="sec-label">06 — Complexity</div>
+        <div class="sec-title">Time & Space Analysis</div>
+        <div class="complexity-grid">
+          <div class="complex-card">
+            <h3>Time Complexity</h3>
+            <div class="complex-row">
+              <span class="op">push(x)</span><span class="big-o">O(1)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">pop()</span><span class="big-o">O(1)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">peek()</span><span class="big-o">O(1)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">isEmpty()</span><span class="big-o">O(1)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">Monotonic traversal</span
+              ><span class="big-o">O(n)*</span>
+            </div>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 14px">
+              * Each element is pushed and popped at most once → O(n) amortized
+              total, not O(n²).
+            </p>
+          </div>
+          <div class="complex-card">
+            <h3>Space Complexity</h3>
+            <div class="complex-row">
+              <span class="op">Stack storage</span
+              ><span class="big-o">O(n)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">Best case (sorted)</span
+              ><span class="big-o">O(1)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">Worst case</span><span class="big-o">O(n)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">Two-stack queue</span
+              ><span class="big-o">O(n)</span>
+            </div>
+            <div class="complex-row">
+              <span class="op">Min stack (auxiliary)</span
+              ><span class="big-o">O(n)</span>
+            </div>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 14px">
+              Space is at most O(n) — you never store more elements than exist
+              in the input.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // ──────────────────────────────────────────────
+      //  LIVE STACK VISUALIZER
+      // ──────────────────────────────────────────────
+      const stackData = [];
+      const rail = document.getElementById("stackRail");
+      const emptyMsg = document.getElementById("emptyMsg");
+
+      function renderStack() {
+        // remove all items except emptyMsg
+        [...rail.querySelectorAll(".stack-item")].forEach((el) => el.remove());
+        if (stackData.length === 0) {
+          emptyMsg.style.display = "block";
+        } else {
+          emptyMsg.style.display = "none";
+          stackData.forEach((val, i) => {
+            const div = document.createElement("div");
+            div.className =
+              "stack-item" + (i === stackData.length - 1 ? " top-item" : "");
+            div.textContent = val;
+            if (i === stackData.length - 1) {
+              const arrow = document.createElement("span");
+              arrow.className = "top-arrow";
+              arrow.textContent = "← TOP";
+              div.appendChild(arrow);
+            }
+            rail.appendChild(div);
+          });
+        }
+        document.getElementById("sizeVal").textContent = stackData.length;
+        document.getElementById("topVal").textContent = stackData.length
+          ? stackData[stackData.length - 1]
+          : "—";
+        document.getElementById("botVal").textContent = stackData.length
+          ? stackData[0]
+          : "—";
+      }
+
+      function log(msg, cls = "") {
+        const box = document.getElementById("logBox");
+        const line = document.createElement("div");
+        line.className = "log-line " + cls;
+        line.textContent = "> " + msg;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function doPush() {
+        const input = document.getElementById("pushInput");
+        const val = input.value.trim();
+        if (!val) return;
+        stackData.push(val);
+        renderStack();
+        // animate top item
+        const items = rail.querySelectorAll(".stack-item");
+        if (items.length) items[items.length - 1].classList.add("new-item");
+        log(`push(${val})  → size=${stackData.length}`, "push");
+        document.getElementById("lastOp").textContent = `push(${val})`;
+        input.value = "";
+        input.focus();
+      }
+
+      function doPop() {
+        if (!stackData.length) {
+          log("pop() → ERROR: stack empty", "err");
+          return;
+        }
+        const items = rail.querySelectorAll(".stack-item");
+        const topEl = items[items.length - 1];
+        const val = stackData[stackData.length - 1];
+        topEl.classList.add("pop-item");
+        setTimeout(() => {
+          stackData.pop();
+          renderStack();
+          log(`pop()  → removed ${val}, size=${stackData.length}`, "pop");
+          document.getElementById("lastOp").textContent = `pop() = ${val}`;
+        }, 280);
+      }
+
+      function doPeek() {
+        if (!stackData.length) {
+          log("peek() → ERROR: stack empty", "err");
+          return;
+        }
+        const val = stackData[stackData.length - 1];
+        log(`peek() → ${val}`, "peek");
+        document.getElementById("lastOp").textContent = `peek() = ${val}`;
+        const items = rail.querySelectorAll(".stack-item");
+        const topEl = items[items.length - 1];
+        topEl.style.boxShadow = "0 0 16px rgba(0,212,255,.5)";
+        setTimeout(() => (topEl.style.boxShadow = ""), 800);
+      }
+
+      function doClear() {
+        stackData.length = 0;
+        renderStack();
+        log("clear() → stack emptied");
+        document.getElementById("lastOp").textContent = "clear()";
+      }
+
+      document.getElementById("pushInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doPush();
+      });
+
+      // ──────────────────────────────────────────────
+      //  TABS
+      // ──────────────────────────────────────────────
+      function showTab(id) {
+        document
+          .querySelectorAll(".algo-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("tab-" + id).classList.add("active");
+        event.target.classList.add("active");
+        if (id === "brackets") resetBrackets();
+        if (id === "monotonic") resetMonotonic();
+      }
+
+      // ──────────────────────────────────────────────
+      //  VALID BRACKETS DEMO
+      // ──────────────────────────────────────────────
+      let bracketRunning = false;
+      const matchMap = { ")": "(", "]": "[", "}": "{" };
+      const isOpen = (c) => "([{".includes(c);
+      const isClose = (c) => ")]}".includes(c);
+
+      function resetBrackets() {
+        bracketRunning = false;
+        const str = document.getElementById("bracketPreset").value;
+        const container = document.getElementById("charBoxes");
+        container.innerHTML = "";
+        str.split("").forEach((ch, i) => {
+          const box = document.createElement("div");
+          box.className =
+            "char-box " +
+            (isOpen(ch) ? "open-b" : isClose(ch) ? "close-b" : "");
+          box.textContent = ch;
+          box.id = "cb" + i;
+          container.appendChild(box);
+        });
+        document.getElementById("miniStack").innerHTML = "";
+        document.getElementById("bracketResult").innerHTML = "";
+      }
+
+      async function runBrackets() {
+        if (bracketRunning) return;
+        bracketRunning = true;
+        const str = document.getElementById("bracketPreset").value;
+        resetBrackets();
+        await sleep(300);
+        const stack = [];
+        let valid = true;
+        for (let i = 0; i < str.length; i++) {
+          const ch = str[i];
+          const box = document.getElementById("cb" + i);
+          box.classList.add("current");
+          await sleep(600);
+          if (isOpen(ch)) {
+            stack.push({ ch, i });
+            addMiniItem(ch);
+            box.classList.remove("current");
+            box.classList.add("matched");
+          } else if (isClose(ch)) {
+            if (stack.length && stack[stack.length - 1].ch === matchMap[ch]) {
+              const top = stack.pop();
+              removeMiniItem();
+              document.getElementById("cb" + top.i).classList.add("matched");
+              box.classList.remove("current");
+              box.classList.add("matched");
+            } else {
+              box.classList.remove("current");
+              box.classList.add("error-b");
+              valid = false;
+              break;
+            }
+          }
+          await sleep(200);
+        }
+        if (valid && stack.length > 0) {
+          stack.forEach(({ i }) => {
+            document.getElementById("cb" + i).classList.remove("matched");
+            document.getElementById("cb" + i).classList.add("error-b");
+          });
+          valid = false;
+        }
+        const res = document.getElementById("bracketResult");
+        res.innerHTML = valid
+          ? '<div class="result-badge valid">✔ VALID — all brackets matched</div>'
+          : '<div class="result-badge invalid">✖ INVALID — unmatched brackets</div>';
+        bracketRunning = false;
+      }
+
+      function addMiniItem(ch) {
+        const ms = document.getElementById("miniStack");
+        const el = document.createElement("div");
+        el.className = "mini-item";
+        el.textContent = ch;
+        ms.appendChild(el);
+      }
+      function removeMiniItem() {
+        const ms = document.getElementById("miniStack");
+        if (ms.lastChild) ms.removeChild(ms.lastChild);
+      }
+
+      document
+        .getElementById("bracketPreset")
+        .addEventListener("change", resetBrackets);
+      resetBrackets();
+
+      // ──────────────────────────────────────────────
+      //  NEXT GREATER ELEMENT DEMO
+      // ──────────────────────────────────────────────
+      const NGR_ARRAY = [4, 3, 6, 2, 8, 1, 5];
+      let monoRunning = false;
+
+      function resetMonotonic() {
+        monoRunning = false;
+        const barsArea = document.getElementById("barsArea");
+        barsArea.innerHTML = "";
+        NGR_ARRAY.forEach((v, i) => {
+          const wrap = document.createElement("div");
+          wrap.className = "bar-wrap";
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.height = v * 24 + "px";
+          bar.id = "bar" + i;
+          const val = document.createElement("div");
+          val.className = "bar-val";
+          val.textContent = v;
+          const idx = document.createElement("div");
+          idx.className = "bar-idx";
+          idx.textContent = i;
+          wrap.appendChild(bar);
+          wrap.appendChild(val);
+          wrap.appendChild(idx);
+          barsArea.appendChild(wrap);
+        });
+
+        const res = document.getElementById("ngrResults");
+        res.innerHTML = "";
+        NGR_ARRAY.forEach((v, i) => {
+          const chip = document.createElement("div");
+          chip.className = "ngr-chip";
+          chip.id = "chip" + i;
+          chip.textContent = `[${i}]=${v}: ?`;
+          res.appendChild(chip);
+        });
+
+        document.getElementById("monoStack").innerHTML = "";
+      }
+
+      async function runMonotonic() {
+        if (monoRunning) return;
+        monoRunning = true;
+        resetMonotonic();
+        await sleep(400);
+
+        const stack = [];
+        const ans = new Array(NGR_ARRAY.length).fill(-1);
+
+        for (let i = 0; i < NGR_ARRAY.length; i++) {
+          const val = NGR_ARRAY[i];
+          document.getElementById("bar" + i).classList.add("active-bar");
+          await sleep(500);
+
+          while (stack.length && NGR_ARRAY[stack[stack.length - 1]] < val) {
+            const idx = stack.pop();
+            ans[idx] = val;
+            document.getElementById("bar" + idx).classList.remove("popped-bar");
+            document.getElementById("bar" + idx).classList.add("result-bar");
+            const chip = document.getElementById("chip" + idx);
+            chip.classList.add("found");
+            chip.textContent = `[${idx}]=${NGR_ARRAY[idx]}: ${val}`;
+            removeMonoItem();
+            await sleep(400);
+          }
+
+          stack.push(i);
+          addMonoItem(val);
+          document.getElementById("bar" + i).classList.remove("active-bar");
+          document.getElementById("bar" + i).classList.add("popped-bar");
+          await sleep(300);
+        }
+
+        // remaining → no greater element
+        stack.forEach((idx) => {
+          const chip = document.getElementById("chip" + idx);
+          chip.classList.add("none");
+          chip.textContent = `[${idx}]=${NGR_ARRAY[idx]}: -1`;
+          document.getElementById("bar" + idx).style.borderColor =
+            "var(--muted)";
+        });
+        monoRunning = false;
+      }
+
+      function addMonoItem(v) {
+        const ms = document.getElementById("monoStack");
+        const el = document.createElement("div");
+        el.className = "mini-item";
+        el.style.border = "2px solid var(--accent3)";
+        el.style.color = "var(--accent3)";
+        el.style.background = "rgba(168,85,247,.1)";
+        el.textContent = v;
+        ms.appendChild(el);
+      }
+      function removeMonoItem() {
+        const ms = document.getElementById("monoStack");
+        if (ms.lastChild) ms.removeChild(ms.lastChild);
+      }
+
+      resetMonotonic();
+
+      // ──────────────────────────────────────────────
+      function sleep(ms) {
+        return new Promise((r) => setTimeout(r, ms));
+      }
+    </script>
+  </body>
+</html>

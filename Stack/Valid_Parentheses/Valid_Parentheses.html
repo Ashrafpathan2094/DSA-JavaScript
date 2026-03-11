@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DSA · Stack — Dark Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #070710;
+  --bg2:      #0d0d1a;
+  --bg3:      #111127;
+  --panel:    #0f0f20;
+  --border:   #1e1e3a;
+  --border2:  #2a2a4a;
+  --text:     #c8c8e8;
+  --muted:    #4a4a6a;
+  --cyan:     #00f5ff;
+  --violet:   #9d4edd;
+  --green:    #39ff6b;
+  --red:      #ff3860;
+  --gold:     #ffd166;
+  --push-c:   #39ff6b;
+  --pop-c:    #ff3860;
+  --active-c: #ffd166;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* ── CANVAS BG ── */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:15px;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+.page{
+  max-width:900px;
+  margin:0 auto;
+  padding:2.5rem 1.5rem 6rem;
+  position:relative;
+  z-index:1;
+}
+
+/* ── HEADER ── */
+.hero{
+  text-align:center;
+  padding:3rem 0 2.5rem;
+  position:relative;
+}
+
+.hero-glow{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  width:500px;height:300px;
+  background:radial-gradient(ellipse, rgba(0,245,255,0.07) 0%, transparent 70%);
+  pointer-events:none;
+  animation:pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow{
+  0%,100%{opacity:0.6;transform:translate(-50%,-60%) scale(1);}
+  50%{opacity:1;transform:translate(-50%,-60%) scale(1.1);}
+}
+
+.hero-tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--cyan);
+  border:1px solid rgba(0,245,255,0.3);
+  padding:0.3rem 0.9rem;
+  border-radius:20px;
+  margin-bottom:1.2rem;
+  animation:fadeSlideDown 0.6s ease both;
+  background:rgba(0,245,255,0.04);
+}
+
+.hero h1{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(2.5rem,7vw,5rem);
+  font-weight:900;
+  letter-spacing:0.06em;
+  line-height:1;
+  animation:fadeSlideDown 0.7s 0.1s ease both;
+}
+
+.hero h1 .c1{color:#fff;}
+.hero h1 .c2{
+  color:var(--cyan);
+  text-shadow:0 0 20px rgba(0,245,255,0.6),0 0 60px rgba(0,245,255,0.3);
+}
+
+.hero-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.78rem;
+  color:var(--muted);
+  margin-top:0.8rem;
+  letter-spacing:0.05em;
+  animation:fadeSlideDown 0.7s 0.2s ease both;
+}
+
+@keyframes fadeSlideDown{
+  from{opacity:0;transform:translateY(-16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;
+  gap:0.3rem;
+  padding:0.5rem;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  margin-bottom:2rem;
+  position:sticky;
+  top:0.5rem;
+  z-index:100;
+  backdrop-filter:blur(20px);
+  animation:fadeSlideDown 0.7s 0.3s ease both;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+
+.tab{
+  flex:1;
+  padding:0.6rem 0.5rem;
+  border:none;
+  border-radius:10px;
+  background:transparent;
+  color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.07em;
+  cursor:pointer;
+  transition:all 0.25s;
+  white-space:nowrap;
+}
+
+.tab:hover{color:var(--text);}
+
+.tab.active{
+  background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(157,78,221,0.15));
+  color:#fff;
+  box-shadow:0 0 20px rgba(0,245,255,0.1);
+  border:1px solid rgba(0,245,255,0.2);
+}
+
+.tab-content{display:none;}
+.tab-content.active{
+  display:block;
+  animation:tabIn 0.35s ease both;
+}
+
+@keyframes tabIn{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ── SECTION HEADS ── */
+.sec-head{
+  font-family:'Orbitron',monospace;
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color:var(--cyan);
+  margin-bottom:1.2rem;
+  display:flex;
+  align-items:center;
+  gap:0.8rem;
+}
+.sec-head::before{content:'//';opacity:0.5;}
+.sec-head::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+h2{
+  font-family:'Orbitron',monospace;
+  font-size:1.3rem;
+  font-weight:700;
+  letter-spacing:0.04em;
+  margin:2rem 0 0.8rem;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:0.7rem;
+}
+
+h2 .num{
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  border-radius:6px;
+  font-size:0.7rem;
+  color:#000;
+  font-weight:900;
+  flex-shrink:0;
+}
+
+h3{
+  font-size:1rem;
+  font-weight:600;
+  color:var(--cyan);
+  margin:1.2rem 0 0.5rem;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+p{margin-bottom:1rem;color:var(--text);font-size:0.95rem;}
+
+/* ── PANELS ── */
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:1.4rem;
+  margin-bottom:1.2rem;
+  position:relative;
+  overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+
+.panel:hover{
+  border-color:var(--border2);
+  box-shadow:0 0 30px rgba(0,245,255,0.04);
+}
+
+.panel::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,245,255,0.4),transparent);
+  animation:scanLine 3s ease-in-out infinite;
+}
+
+@keyframes scanLine{
+  0%{opacity:0;transform:scaleX(0);}
+  50%{opacity:1;transform:scaleX(1);}
+  100%{opacity:0;transform:scaleX(0);}
+}
+
+/* ── CALLOUTS ── */
+.callout{
+  border-left:3px solid var(--cyan);
+  background:rgba(0,245,255,0.04);
+  padding:1rem 1.2rem;
+  border-radius:0 10px 10px 0;
+  margin:1rem 0;
+  position:relative;
+  overflow:hidden;
+}
+.callout.violet{border-color:var(--violet);background:rgba(157,78,221,0.05);}
+.callout.gold{border-color:var(--gold);background:rgba(255,209,102,0.05);}
+.callout.green{border-color:var(--green);background:rgba(57,255,107,0.04);}
+.callout.red{border-color:var(--red);background:rgba(255,56,96,0.05);}
+
+.callout-title{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.62rem;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:var(--cyan);
+  margin-bottom:0.4rem;
+}
+.callout.violet .callout-title{color:var(--violet);}
+.callout.gold .callout-title{color:var(--gold);}
+.callout.green .callout-title{color:var(--green);}
+.callout.red .callout-title{color:var(--red);}
+
+/* ── CODE ── */
+code{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.82em;
+  background:rgba(0,245,255,0.07);
+  color:var(--cyan);
+  padding:0.1em 0.35em;
+  border-radius:4px;
+}
+
+.codeblock{
+  background:#090916;
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:1.4rem;
+  margin:1rem 0;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.78rem;
+  line-height:1.85;
+  overflow-x:auto;
+  position:relative;
+  box-shadow:inset 0 0 40px rgba(0,0,0,0.3);
+}
+
+.codeblock .lang{
+  position:absolute;top:0.6rem;right:0.8rem;
+  font-size:0.58rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+}
+
+.kw{color:#c792ea;}
+.fn{color:#82aaff;}
+.str{color:#c3e88d;}
+.cm{color:#3a3a5a;font-style:italic;}
+.nm{color:#f78c6c;}
+.acc{color:var(--cyan);}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.88rem;}
+th{
+  background:rgba(0,245,255,0.07);
+  color:var(--cyan);
+  padding:0.6rem 1rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  border-bottom:1px solid var(--border2);
+}
+td{
+  padding:0.6rem 1rem;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+tr:hover td{background:rgba(0,245,255,0.03);}
+
+/* ── BADGES ── */
+.badge-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.8rem 0;}
+.badge{
+  padding:0.25rem 0.75rem;
+  border-radius:20px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.68rem;
+  font-weight:600;
+}
+.b-cyan  {background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.25);color:var(--cyan);}
+.b-green {background:rgba(57,255,107,0.08);border:1px solid rgba(57,255,107,0.25);color:var(--green);}
+.b-violet{background:rgba(157,78,221,0.1);border:1px solid rgba(157,78,221,0.3);color:var(--violet);}
+.b-gold  {background:rgba(255,209,102,0.08);border:1px solid rgba(255,209,102,0.25);color:var(--gold);}
+.b-red   {background:rgba(255,56,96,0.08);border:1px solid rgba(255,56,96,0.25);color:var(--red);}
+
+/* ── STACK DIAGRAM ── */
+.diagram{
+  display:flex;
+  justify-content:center;
+  padding:1.5rem 0;
+  margin:1rem 0;
+}
+
+.sd-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+
+.sd-pointer{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;
+  color:var(--red);
+  margin-bottom:4px;
+  animation:blink 1.5s infinite;
+  display:flex;align-items:center;gap:4px;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.sd-item{
+  width:200px;height:48px;
+  border:2px solid var(--border2);
+  background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.9rem;
+  color:var(--text);
+  position:relative;
+  transition:all 0.3s;
+}
+.sd-item:hover{border-color:var(--cyan);color:var(--cyan);}
+.sd-item.top-item{
+  border-color:var(--red);
+  color:var(--red);
+  background:rgba(255,56,96,0.05);
+  box-shadow:0 0 20px rgba(255,56,96,0.2);
+}
+.sd-idx{
+  position:absolute;right:-55px;
+  font-size:0.6rem;color:var(--muted);
+  white-space:nowrap;
+}
+.sd-base{
+  width:200px;height:6px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent);
+  border-radius:0 0 4px 4px;
+  box-shadow:0 0 10px rgba(0,245,255,0.3);
+}
+
+/* ── PATTERN CARDS ── */
+.pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin:1rem 0;}
+@media(max-width:580px){.pattern-grid{grid-template-columns:1fr;}}
+
+.pcard{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1rem;
+  transition:all 0.25s;
+  cursor:default;
+}
+.pcard:hover{
+  border-color:var(--cyan);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,245,255,0.08);
+}
+.pcard-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:var(--muted);
+  margin-bottom:0.4rem;
+}
+.pcard-title{font-weight:700;font-size:0.95rem;margin-bottom:0.25rem;color:#fff;}
+.pcard-hint{font-size:0.82rem;color:var(--muted);}
+.lc-tag{
+  display:inline-block;
+  padding:0.12rem 0.5rem;
+  border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  margin-top:0.5rem;
+}
+.easy{background:rgba(57,255,107,0.1);color:var(--green);}
+.med {background:rgba(255,209,102,0.1);color:var(--gold);}
+.hard{background:rgba(255,56,96,0.1); color:var(--red);}
+
+/* ── QUIZ ── */
+.quiz-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.3rem;
+  margin:0.8rem 0;
+  transition:border-color 0.3s;
+}
+.quiz-q{font-weight:600;margin-bottom:0.8rem;color:#fff;}
+.quiz-options{display:flex;flex-direction:column;gap:0.4rem;}
+.quiz-opt{
+  padding:0.6rem 1rem;
+  border-radius:8px;
+  border:1px solid var(--border2);
+  background:var(--bg2);
+  color:var(--text);
+  font-size:0.88rem;
+  cursor:pointer;
+  text-align:left;
+  font-family:'Outfit',sans-serif;
+  transition:all 0.15s;
+}
+.quiz-opt:hover{border-color:var(--cyan);color:#fff;background:rgba(0,245,255,0.04);}
+.quiz-opt.correct{background:rgba(57,255,107,0.08);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong  {background:rgba(255,56,96,0.06); border-color:var(--red);  color:var(--red);}
+.quiz-explain{
+  display:none;margin-top:0.8rem;font-size:0.85rem;color:var(--muted);
+  border-top:1px solid var(--border);padding-top:0.7rem;font-style:italic;
+}
+
+/* ══════════ VISUALIZER ══════════ */
+.vis-input-row{display:flex;gap:0.6rem;margin-bottom:0.6rem;}
+.vis-input-row input{
+  flex:1;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:0.7rem 1rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1rem;
+  letter-spacing:0.15em;
+  color:#fff;
+  outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+.vis-input-row input:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(0,245,255,0.1),0 0 20px rgba(0,245,255,0.08);
+}
+
+.presets{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+.preset-btn{
+  background:transparent;
+  border:1px solid var(--border2);
+  border-radius:6px;
+  color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;
+  padding:0.28rem 0.65rem;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.preset-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,245,255,0.04);}
+
+.vis-controls{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  padding:0.6rem 1.1rem;
+  border-radius:9px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;font-size:0.75rem;
+  cursor:pointer;border:none;outline:none;
+  transition:all 0.15s;
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+
+.btn-step{
+  background:linear-gradient(135deg,var(--cyan),#00b4cc);
+  color:#000;
+  box-shadow:0 0 16px rgba(0,245,255,0.3);
+}
+.btn-step:hover{box-shadow:0 0 28px rgba(0,245,255,0.5);transform:translateY(-1px);}
+
+.btn-auto{
+  background:transparent;
+  border:1px solid var(--violet);
+  color:var(--violet);
+}
+.btn-auto:hover{background:rgba(157,78,221,0.1);box-shadow:0 0 16px rgba(157,78,221,0.2);}
+.btn-auto.running{background:rgba(157,78,221,0.15);box-shadow:0 0 20px rgba(157,78,221,0.3);}
+
+.btn-reset{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--muted);
+}
+.btn-reset:hover{border-color:var(--red);color:var(--red);}
+
+.btn:disabled{opacity:0.3;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+
+.speed-row{display:flex;align-items:center;gap:0.7rem;margin-bottom:1.2rem;}
+.speed-row label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);white-space:nowrap;}
+input[type=range]{flex:1;accent-color:var(--cyan);cursor:pointer;}
+
+/* stats */
+.vis-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.2rem;}
+.vstat{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:0.8rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.vstat::after{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(0,245,255,0.05),transparent 70%);
+  pointer-events:none;
+}
+.vstat .val{
+  font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;
+  color:var(--cyan);line-height:1;
+  text-shadow:0 0 20px rgba(0,245,255,0.4);
+}
+.vstat .lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.3rem;}
+
+/* vis grid */
+.vis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+@media(max-width:600px){.vis-grid{grid-template-columns:1fr;}}
+
+.vis-panel{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.1rem;
+  position:relative;overflow:hidden;
+}
+
+.vis-label{
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--muted);margin-bottom:0.8rem;
+}
+
+/* string chars */
+.string-display{display:flex;gap:0.35rem;flex-wrap:wrap;min-height:54px;align-items:center;}
+
+.char-cell{
+  width:42px;height:42px;
+  border-radius:9px;
+  border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;
+  transition:all 0.25s cubic-bezier(.34,1.56,.64,1);
+  background:var(--bg2);color:var(--muted);
+  position:relative;
+}
+
+.char-cell.active{
+  border-color:var(--active-c);
+  color:var(--active-c);
+  background:rgba(255,209,102,0.08);
+  transform:scale(1.2) translateY(-5px);
+  box-shadow:0 0 20px rgba(255,209,102,0.4),0 8px 16px rgba(0,0,0,0.3);
+  z-index:2;
+}
+.char-cell.done-push{border-color:var(--push-c);color:var(--push-c);background:rgba(57,255,107,0.06);}
+.char-cell.done-pop {border-color:var(--pop-c); color:var(--pop-c); background:rgba(255,56,96,0.06);}
+.char-cell.done-ok  {border-color:var(--border);opacity:0.4;}
+.char-cell.error-cell{
+  border-color:var(--red);color:var(--red);
+  background:rgba(255,56,96,0.1);
+  animation:shake 0.4s ease,redPulse 0.6s ease;
+}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes redPulse{0%{box-shadow:0 0 0 0 rgba(255,56,96,0.5)}100%{box-shadow:0 0 0 16px rgba(255,56,96,0)}}
+
+/* STACK VISUALIZER */
+.stack-vis-area{
+  display:flex;flex-direction:column-reverse;
+  align-items:center;gap:2px;
+  min-height:210px;padding:0.5rem 0 1.5rem;
+  position:relative;
+}
+
+.stack-empty-msg{
+  color:var(--muted);font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;position:absolute;top:40%;
+  transform:translateY(-50%);
+  text-align:center;
+  animation:emptyPulse 2s infinite;
+}
+@keyframes emptyPulse{0%,100%{opacity:0.3}50%{opacity:0.7}}
+
+.stack-vis-item{
+  width:130px;height:44px;
+  border:2px solid var(--cyan);
+  background:rgba(0,245,255,0.04);
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:600;
+  color:var(--cyan);
+  position:relative;flex-shrink:0;
+  box-shadow:0 0 12px rgba(0,245,255,0.15),inset 0 0 20px rgba(0,245,255,0.03);
+  animation:stkPush 0.35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.stack-vis-item .sidx{
+  position:absolute;right:-28px;
+  font-size:0.58rem;color:var(--muted);
+}
+
+.stack-vis-item.popping{
+  animation:stkPop 0.3s ease forwards;
+  border-color:var(--red);color:var(--red);
+  box-shadow:0 0 20px rgba(255,56,96,0.3);
+}
+
+@keyframes stkPush{
+  0%{transform:translateY(-30px) scale(0.6);opacity:0;filter:blur(4px);}
+  60%{filter:blur(0);}
+  100%{transform:translateY(0) scale(1);opacity:1;}
+}
+@keyframes stkPop{
+  0%{transform:translateY(0) scale(1);opacity:1;filter:blur(0);}
+  100%{transform:translateY(-35px) scale(0.5);opacity:0;filter:blur(4px);}
+}
+
+.stack-vis-base{
+  width:130px;height:6px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent);
+  border-radius:0 0 4px 4px;
+  box-shadow:0 0 12px rgba(0,245,255,0.3);
+  flex-shrink:0;
+  position:relative;
+}
+.stack-vis-base::after{
+  content:'BASE';
+  position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+  font-family:'IBM Plex Mono',monospace;font-size:0.52rem;
+  color:var(--muted);letter-spacing:0.15em;
+}
+
+/* step bar */
+.step-bar{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;}
+.step-num{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);white-space:nowrap;}
+.step-progress{flex:1;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.step-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));
+  border-radius:2px;
+  transition:width 0.3s ease;
+  box-shadow:0 0 8px rgba(0,245,255,0.5);
+}
+
+/* log */
+.log-list{
+  display:flex;flex-direction:column;gap:0.3rem;
+  max-height:200px;overflow-y:auto;padding-right:0.2rem;
+}
+.log-list::-webkit-scrollbar{width:3px;}
+.log-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+.log-entry{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.45rem 0.8rem;
+  border-radius:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+  background:var(--bg2);border:1px solid transparent;
+  animation:logSlide 0.2s ease both;
+}
+@keyframes logSlide{from{transform:translateX(-10px);opacity:0}to{transform:translateX(0);opacity:1}}
+.log-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:currentColor;}
+.log-push{color:var(--push-c);border-color:rgba(57,255,107,0.15);}
+.log-pop {color:var(--pop-c); border-color:rgba(255,56,96,0.15);}
+.log-info{color:var(--cyan);  border-color:rgba(0,245,255,0.12);}
+.log-err {color:var(--red);   border-color:rgba(255,56,96,0.25);background:rgba(255,56,96,0.04);}
+.log-gold{color:var(--gold);  border-color:rgba(255,209,102,0.15);}
+
+/* result */
+.result-banner{
+  padding:1rem 1.4rem;border-radius:12px;
+  display:flex;align-items:center;gap:1rem;
+  font-weight:700;font-size:1rem;
+  opacity:0;transform:translateY(10px) scale(0.97);
+  transition:all 0.4s cubic-bezier(.34,1.56,.64,1);
+  margin-top:1rem;
+  font-family:'Orbitron',monospace;
+  letter-spacing:0.04em;
+}
+.result-banner.visible{opacity:1;transform:translateY(0) scale(1);}
+.result-banner.valid{
+  background:rgba(57,255,107,0.06);
+  border:1px solid rgba(57,255,107,0.3);
+  color:var(--green);
+  box-shadow:0 0 30px rgba(57,255,107,0.1);
+}
+.result-banner.invalid{
+  background:rgba(255,56,96,0.06);
+  border:1px solid rgba(255,56,96,0.3);
+  color:var(--red);
+  box-shadow:0 0 30px rgba(255,56,96,0.1);
+}
+.result-icon{font-size:1.5rem;}
+
+/* code highlight */
+.code-line{display:block;padding:1px 0.4rem;border-radius:4px;transition:background 0.2s;border-left:2px solid transparent;}
+.code-line.hl{
+  background:rgba(255,209,102,0.08);
+  border-left-color:var(--gold);
+  padding-left:0.2rem;
+}
+
+/* PARTICLE BURST */
+.particle{
+  position:fixed;
+  pointer-events:none;
+  border-radius:50%;
+  z-index:9999;
+  animation:particleFly var(--dur,0.8s) ease forwards;
+}
+@keyframes particleFly{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}
+}
+
+hr{border:none;border-top:1px solid var(--border);margin:1.8rem 0;}
+</style>
+</head>
+<body>
+
+<!-- Animated particle canvas background -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-tag">DSA Revision Notes · Stack · LeetCode</div>
+    <h1><span class="c1">STACK</span> <span class="c2">DSA</span></h1>
+    <div class="hero-sub">// Valid Parentheses · Monotonic Stack · Patterns · Visualizer · Quiz</div>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('notes',this)">📖 Notes</button>
+    <button class="tab" onclick="switchTab('patterns',this)">🔁 Patterns</button>
+    <button class="tab" onclick="switchTab('code',this)">💻 Code</button>
+    <button class="tab" onclick="switchTab('vis',this)">🎬 Visualizer</button>
+    <button class="tab" onclick="switchTab('quiz',this)">🧪 Quiz</button>
+  </div>
+
+  <!-- ════════════════════ NOTES ════════════════════ -->
+  <div class="tab-content active" id="tab-notes">
+
+    <div class="sec-head">Fundamentals</div>
+
+    <h2><span class="num">1</span> What Is a Stack?</h2>
+    <p>A <strong>stack</strong> is a linear data structure operating on the <strong>LIFO</strong> principle — <em>Last In, First Out</em>. The most recently added element is always the first to be removed.</p>
+    <p>Real-world analogies: a stack of plates, browser back-button history, undo in a text editor, the call stack in your runtime.</p>
+
+    <div class="diagram">
+      <div class="sd-wrap">
+        <div class="sd-pointer">← PUSH / POP only here (TOP)</div>
+        <div class="sd-item top-item">&nbsp;&nbsp;'(' &nbsp;&nbsp;<span class="sd-idx">← index 2 · TOP</span></div>
+        <div class="sd-item">&nbsp;&nbsp;'[' &nbsp;&nbsp;<span class="sd-idx">index 1</span></div>
+        <div class="sd-item">&nbsp;&nbsp;'{' &nbsp;&nbsp;<span class="sd-idx">index 0 · bottom</span></div>
+        <div class="sd-base"></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">🔑 Core Rule</div>
+      You can <strong>only touch the top element</strong>. No random access. This single constraint makes the stack elegant for matching, backtracking, and undo problems.
+    </div>
+
+    <h2><span class="num">2</span> Core Operations</h2>
+
+    <table>
+      <tr><th>Operation</th><th>What it does</th><th>Time</th><th>Stack after</th></tr>
+      <tr><td><code>push(x)</code></td><td>Add element to top</td><td>O(1)</td><td>[…, x]</td></tr>
+      <tr><td><code>pop()</code></td><td>Remove &amp; return top element</td><td>O(1)</td><td>[…] (x gone)</td></tr>
+      <tr><td><code>peek()</code> / <code>top()</code></td><td>Read top without removing</td><td>O(1)</td><td>unchanged</td></tr>
+      <tr><td><code>isEmpty()</code></td><td>True if no elements</td><td>O(1)</td><td>unchanged</td></tr>
+      <tr><td><code>size()</code></td><td>Count of elements</td><td>O(1)</td><td>unchanged</td></tr>
+    </table>
+
+    <div class="badge-row">
+      <span class="badge b-green">All core ops: O(1)</span>
+      <span class="badge b-cyan">Space: O(n)</span>
+    </div>
+
+    <h2><span class="num">3</span> JavaScript Implementation</h2>
+
+    <h3>// Using an Array (interview standard)</h3>
+    <div class="codeblock"><span class="lang">JS</span><span class="kw">const</span> stack = [];
+
+stack.<span class="fn">push</span>(<span class="str">'a'</span>);           <span class="cm">// push → ['a']</span>
+stack.<span class="fn">push</span>(<span class="str">'b'</span>);           <span class="cm">// push → ['a','b']</span>
+stack[stack.length - <span class="nm">1</span>];  <span class="cm">// peek → 'b'</span>
+stack.<span class="fn">pop</span>();              <span class="cm">// pop  → returns 'b', stack=['a']</span>
+stack.length === <span class="nm">0</span>;       <span class="cm">// isEmpty → false</span></div>
+
+    <h3>// Class-based Implementation</h3>
+    <div class="codeblock"><span class="lang">JS</span><span class="kw">class</span> <span class="fn">Stack</span> {
+  <span class="fn">constructor</span>() { <span class="kw">this</span>.data = []; }
+  <span class="fn">push</span>(x)   { <span class="kw">this</span>.data.<span class="fn">push</span>(x); }
+  <span class="fn">pop</span>()     { <span class="kw">return</span> <span class="kw">this</span>.data.<span class="fn">pop</span>(); }
+  <span class="fn">peek</span>()    { <span class="kw">return</span> <span class="kw">this</span>.data.at(-<span class="nm">1</span>); }
+  <span class="fn">isEmpty</span>() { <span class="kw">return</span> <span class="kw">this</span>.data.length === <span class="nm">0</span>; }
+  <span class="fn">size</span>()    { <span class="kw">return</span> <span class="kw">this</span>.data.length; }
+}</div>
+
+    <h2><span class="num">4</span> When to Reach for a Stack</h2>
+
+    <table>
+      <tr><th>Problem Signal</th><th>Why Stack Works</th></tr>
+      <tr><td>Matching pairs / brackets</td><td>Push openers, pop on closer, verify match</td></tr>
+      <tr><td>"Most recent" or "previous" element</td><td>Stack gives O(1) access to last-seen item</td></tr>
+      <tr><td>Undo / backtrack</td><td>LIFO naturally reverses operations</td></tr>
+      <tr><td>Nested structures (HTML, JSON, parens)</td><td>Depth tracking via push/pop</td></tr>
+      <tr><td>Next Greater / Smaller Element</td><td>Monotonic stack pattern</td></tr>
+      <tr><td>Evaluate RPN expressions</td><td>Push operands, apply operator on pop</td></tr>
+      <tr><td>Iterative DFS on graph/tree</td><td>Explicit stack replaces recursive call stack</td></tr>
+    </table>
+
+    <div class="callout gold">
+      <div class="callout-title">⚠ Watch Out</div>
+      Always check <code>isEmpty()</code> before calling <code>pop()</code> or <code>peek()</code>. In JavaScript, popping an empty array returns <code>undefined</code> — not an error — which can silently corrupt comparisons.
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">💡 JS Trick</div>
+      <code>stack.pop()</code> returns the removed element. Use this to check-and-remove in one line:<br/>
+      <code>if (stack.pop() !== expected) return false;</code>
+    </div>
+
+    <h2><span class="num">5</span> Complexity Summary</h2>
+    <div class="badge-row">
+      <span class="badge b-green">push: O(1)</span>
+      <span class="badge b-green">pop: O(1)</span>
+      <span class="badge b-green">peek: O(1)</span>
+      <span class="badge b-cyan">space: O(n) worst case</span>
+    </div>
+    <p>Worst-case space: every character is an opener (e.g. <code>"((((("</code>), so all n chars are on the stack before any pops happen.</p>
+
+  </div>
+
+  <!-- ════════════════════ PATTERNS ════════════════════ -->
+  <div class="tab-content" id="tab-patterns">
+
+    <div class="sec-head">Stack Patterns</div>
+
+    <h2><span class="num">1</span> Matching Brackets</h2>
+    <p>The most classic stack pattern. Push every opener. On every closer, pop and verify the match. At end, the stack must be empty.</p>
+
+    <div class="callout">
+      <div class="callout-title">Template Logic</div>
+      Push openers → closer seen? pop and compare → end of string? check stack is empty.
+    </div>
+
+    <div class="codeblock"><span class="lang">JS · Matching Template</span><span class="kw">const</span> map = { <span class="str">')'</span>:<span class="str">'('</span>, <span class="str">']'</span>:<span class="str">'['</span>, <span class="str">'}'</span>:<span class="str">'{'</span> };
+<span class="kw">const</span> stack = [];
+<span class="kw">for</span> (<span class="kw">const</span> ch <span class="kw">of</span> s) {
+  <span class="kw">if</span> (map[ch]) {
+    <span class="kw">if</span> (stack.<span class="fn">pop</span>() !== map[ch]) <span class="kw">return false</span>;
+  } <span class="kw">else</span> {
+    stack.<span class="fn">push</span>(ch);
+  }
+}
+<span class="kw">return</span> stack.length === <span class="nm">0</span>;</div>
+
+    <hr/>
+
+    <h2><span class="num">2</span> Monotonic Stack</h2>
+    <p>Maintain a stack in strictly increasing or decreasing order. When a new element violates the order, pop until it doesn't. Perfect for "next greater/smaller" problems.</p>
+
+    <div class="codeblock"><span class="lang">JS · Next Greater Element</span><span class="kw">function</span> <span class="fn">nextGreater</span>(nums) {
+  <span class="kw">const</span> res = <span class="kw">new</span> <span class="fn">Array</span>(nums.length).<span class="fn">fill</span>(-<span class="nm">1</span>);
+  <span class="kw">const</span> stack = [];   <span class="cm">// stores indices</span>
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+    <span class="kw">while</span> (stack.length &amp;&amp; nums[stack.at(-<span class="nm">1</span>)] &lt; nums[i]) {
+      res[stack.<span class="fn">pop</span>()] = nums[i];
+    }
+    stack.<span class="fn">push</span>(i);
+  }
+  <span class="kw">return</span> res;
+}</div>
+
+    <hr/>
+
+    <h2><span class="num">3</span> Stack for Iterative DFS</h2>
+    <p>Replace the implicit call stack with an explicit one. Push neighbours, pop to visit. Identical logic to recursion, but avoids stack overflow on huge graphs.</p>
+
+    <div class="codeblock"><span class="lang">JS · Iterative DFS</span><span class="kw">function</span> <span class="fn">dfs</span>(graph, start) {
+  <span class="kw">const</span> visited = <span class="kw">new</span> <span class="fn">Set</span>();
+  <span class="kw">const</span> stack = [start];
+  <span class="kw">while</span> (stack.length) {
+    <span class="kw">const</span> node = stack.<span class="fn">pop</span>();
+    <span class="kw">if</span> (visited.<span class="fn">has</span>(node)) <span class="kw">continue</span>;
+    visited.<span class="fn">add</span>(node);
+    <span class="kw">for</span> (<span class="kw">const</span> nb <span class="kw">of</span> graph[node]) stack.<span class="fn">push</span>(nb);
+  }
+}</div>
+
+    <hr/>
+
+    <h2><span class="num">4</span> LeetCode Problem Map</h2>
+    <div class="pattern-grid">
+      <div class="pcard"><div class="pcard-tag">Matching</div><div class="pcard-title">20. Valid Parentheses</div><div class="pcard-hint">Push openers, pop on closer</div><span class="lc-tag easy">Easy</span></div>
+      <div class="pcard"><div class="pcard-tag">Matching</div><div class="pcard-title">1249. Min Remove to Make Valid</div><div class="pcard-hint">Track unmatched indices with stack</div><span class="lc-tag med">Medium</span></div>
+      <div class="pcard"><div class="pcard-tag">Monotonic</div><div class="pcard-title">496. Next Greater Element I</div><div class="pcard-hint">Mono stack + hash map</div><span class="lc-tag easy">Easy</span></div>
+      <div class="pcard"><div class="pcard-tag">Monotonic</div><div class="pcard-title">84. Largest Rectangle Histogram</div><div class="pcard-hint">Mono stack for width boundaries</div><span class="lc-tag hard">Hard</span></div>
+      <div class="pcard"><div class="pcard-tag">Expression</div><div class="pcard-title">150. Evaluate RPN</div><div class="pcard-hint">Push operands, apply operator</div><span class="lc-tag med">Medium</span></div>
+      <div class="pcard"><div class="pcard-tag">Expression</div><div class="pcard-title">224. Basic Calculator</div><div class="pcard-hint">Stack for signs and parens</div><span class="lc-tag hard">Hard</span></div>
+      <div class="pcard"><div class="pcard-tag">Backtrack</div><div class="pcard-title">71. Simplify Path</div><div class="pcard-hint">Push dirs, pop on '..'</div><span class="lc-tag med">Medium</span></div>
+      <div class="pcard"><div class="pcard-tag">Design</div><div class="pcard-title">155. Min Stack</div><div class="pcard-hint">Two stacks: main + min-tracker</div><span class="lc-tag med">Medium</span></div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════ CODE ════════════════════ -->
+  <div class="tab-content" id="tab-code">
+
+    <div class="sec-head">Code Analysis</div>
+
+    <h2><span class="num">1</span> Your Original Code</h2>
+    <div class="codeblock"><span class="lang">JS · Original</span><span class="kw">var</span> <span class="fn">isValid</span> = <span class="kw">function</span>(s) {
+  <span class="kw">let</span> stack = [];
+  <span class="kw">const</span> closingObj = { <span class="str">")"</span>:<span class="str">"("</span>, <span class="str">"}"</span>:<span class="str">"{"</span>, <span class="str">"]"</span>:<span class="str">"["</span> };
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="nm">0</span>; i &lt; s.length; i++) {
+    <span class="kw">if</span> (s[i] === <span class="str">"("</span> || s[i] === <span class="str">"["</span> || s[i] === <span class="str">"{"</span>) {
+      stack.<span class="fn">push</span>(s[i]);
+    } <span class="kw">else</span> {
+      <span class="kw">const</span> topElement = stack[stack.length - <span class="nm">1</span>];
+      <span class="kw">if</span> (topElement != closingObj[s[i]]) {
+        <span class="kw">return false</span>;
+      } <span class="kw">else</span> {
+        stack.<span class="fn">pop</span>();
+      }
+    }
+  }
+  <span class="kw">if</span> (stack.length) <span class="kw">return false</span>;
+  <span class="kw">return true</span>;
+};</div>
+
+    <hr/>
+
+    <h2><span class="num">2</span> Optimised Code</h2>
+
+    <div class="callout green">
+      <div class="callout-title">Change 1 — Detect closers via map lookup (truthy check)</div>
+      Replaced the verbose <code>s[i]==='(' || s[i]==='[' || ...</code> chain with <code>map[ch]</code>. If truthy it's a closer, if falsy (undefined) it's an opener. Also safely handles unexpected characters.
+    </div>
+    <div class="callout violet">
+      <div class="callout-title">Change 2 — Combine peek + pop into one call</div>
+      <code>stack[stack.length-1]</code> then separately <code>stack.pop()</code> = two operations. Replaced with a single <code>stack.pop()</code> directly in the condition. Cleaner, fewer lines, same result.
+    </div>
+    <div class="callout">
+      <div class="callout-title">Change 3 — Single-expression final return</div>
+      <code>if (stack.length) return false; return true;</code> collapses to <code>return stack.length === 0;</code>
+    </div>
+
+    <div class="codeblock"><span class="lang">JS · Optimised</span><span class="kw">var</span> <span class="fn">isValid</span> = <span class="kw">function</span>(s) {
+  <span class="kw">const</span> stack = [];
+  <span class="kw">const</span> map = { <span class="str">')'</span>:<span class="str">'('</span>, <span class="str">'}'</span>:<span class="str">'{'</span>, <span class="str">']'</span>:<span class="str">'['</span> };
+  <span class="kw">for</span> (<span class="kw">const</span> ch <span class="kw">of</span> s) {
+    <span class="kw">if</span> (map[ch]) {
+      <span class="kw">if</span> (stack.<span class="fn">pop</span>() !== map[ch]) <span class="kw">return false</span>;
+    } <span class="kw">else</span> {
+      stack.<span class="fn">push</span>(ch);
+    }
+  }
+  <span class="kw">return</span> stack.length === <span class="nm">0</span>;
+};</div>
+
+    <div class="badge-row">
+      <span class="badge b-green">Time: O(n)</span>
+      <span class="badge b-cyan">Space: O(n)</span>
+      <span class="badge b-gold">Same complexity · Cleaner code</span>
+    </div>
+
+    <hr/>
+
+    <h2><span class="num">3</span> Step-by-step trace — <code>"([()]"</code></h2>
+
+    <table>
+      <tr><th>i</th><th>char</th><th>Action</th><th>Stack after</th><th>Notes</th></tr>
+      <tr><td>0</td><td><code>(</code></td><td>PUSH</td><td>[ ( ]</td><td>opener</td></tr>
+      <tr><td>1</td><td><code>[</code></td><td>PUSH</td><td>[ (, [ ]</td><td>opener</td></tr>
+      <tr><td>2</td><td><code>(</code></td><td>PUSH</td><td>[ (, [, ( ]</td><td>opener</td></tr>
+      <tr><td>3</td><td><code>)</code></td><td>POP → '(' ✓</td><td>[ (, [ ]</td><td>matched</td></tr>
+      <tr><td>4</td><td><code>]</code></td><td>POP → '[' ✓</td><td>[ ( ]</td><td>matched</td></tr>
+      <tr><td>—</td><td>end</td><td>stack.length = 1</td><td>[ ( ]</td><td>❌ not empty → <strong>false</strong></td></tr>
+    </table>
+
+    <div class="callout red">
+      <div class="callout-title">Result</div>
+      <strong>false</strong> — the outer <code>(</code> at index 0 was never closed.
+    </div>
+
+  </div>
+
+  <!-- ════════════════════ VISUALIZER ════════════════════ -->
+  <div class="tab-content" id="tab-vis">
+
+    <div class="sec-head">Interactive Visualizer</div>
+
+    <div class="panel">
+      <div class="vis-input-row">
+        <input type="text" id="inputStr" value="([()]" placeholder="e.g. ({[]})" maxlength="20" spellcheck="false"/>
+      </div>
+      <div class="presets">
+        <button class="preset-btn" onclick="setPreset('()')">( )</button>
+        <button class="preset-btn" onclick="setPreset('()[]{}')">()[]{}</button>
+        <button class="preset-btn" onclick="setPreset('(]')">(] ✗</button>
+        <button class="preset-btn" onclick="setPreset('([{}])')">([{}])</button>
+        <button class="preset-btn" onclick="setPreset('([()]')">([()]  ✗</button>
+        <button class="preset-btn" onclick="setPreset('{[()]}')"> {[()]} </button>
+        <button class="preset-btn" onclick="setPreset('((((')">((((  ✗</button>
+        <button class="preset-btn" onclick="setPreset('({[]})()')">({[]})()</button>
+      </div>
+
+      <div class="vis-controls">
+        <button class="btn btn-step" id="btnStep" onclick="step()">▶ STEP</button>
+        <button class="btn btn-auto" id="btnAuto" onclick="toggleAuto()">⚡ AUTO</button>
+        <button class="btn btn-reset" onclick="reset()">↺ RESET</button>
+      </div>
+      <div class="speed-row">
+        <label>Speed</label>
+        <input type="range" id="speedSlider" min="150" max="1500" value="700" step="50" oninput="updateSpeed()"/>
+        <label id="speedLabel">700ms</label>
+      </div>
+    </div>
+
+    <div class="vis-stats">
+      <div class="vstat"><div class="val" id="vStep">0</div><div class="lbl">Step</div></div>
+      <div class="vstat"><div class="val" id="vSize">0</div><div class="lbl">Stack Size</div></div>
+      <div class="vstat"><div class="val" id="vOps">0</div><div class="lbl">Ops</div></div>
+    </div>
+
+    <div class="vis-grid">
+      <div class="vis-panel">
+        <div class="vis-label">String Traversal</div>
+        <div class="step-bar">
+          <span class="step-num" id="stepLabel">0 / 0</span>
+          <div class="step-progress"><div class="step-fill" id="stepFill" style="width:0%"></div></div>
+        </div>
+        <div class="string-display" id="stringDisplay"></div>
+      </div>
+      <div class="vis-panel">
+        <div class="vis-label">Stack (LIFO)</div>
+        <div class="stack-vis-area" id="stackArea">
+          <span class="stack-empty-msg" id="stackEmpty">[ empty ]</span>
+          <div class="stack-vis-base"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vis-panel" style="margin-bottom:1rem;">
+      <div class="vis-label">Execution Log</div>
+      <div class="log-list" id="logList">
+        <div class="log-entry log-info"><span class="log-dot"></span>Ready — enter a string and press STEP or AUTO</div>
+      </div>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <span class="result-icon" id="resultIcon"></span>
+      <span id="resultText"></span>
+    </div>
+
+    <div class="panel" style="margin-top:1.2rem;">
+      <div class="vis-label">Live Code — highlighted line = current execution</div>
+      <div class="codeblock" style="margin:0;">
+        <pre id="codeBlock" style="margin:0;background:none;padding:0;color:inherit;font-size:0.78rem;line-height:1.9;"><span class="code-line" id="cl2"><span class="kw">const</span> stack = [], map = { <span class="str">')'</span>:<span class="str">'('</span>, <span class="str">'}'</span>:<span class="str">'{'</span>, <span class="str">']'</span>:<span class="str">'['</span> };</span>
+<span class="code-line" id="cl4"><span class="kw">for</span> (<span class="kw">const</span> ch <span class="kw">of</span> s) {</span>
+<span class="code-line" id="cl5">  <span class="kw">if</span> (map[ch]) {              <span class="cm">// closing bracket</span></span>
+<span class="code-line" id="cl7">    <span class="kw">if</span> (stack.<span class="fn">pop</span>() !== map[ch]) <span class="kw">return false</span>;</span>
+<span class="code-line" id="cl9">  } <span class="kw">else</span> { stack.<span class="fn">push</span>(ch); } <span class="cm">// opening bracket</span></span>
+<span class="code-line" id="cl12">}<span class="kw"> return</span> stack.length === <span class="nm">0</span>;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ QUIZ ════════════════════ -->
+  <div class="tab-content" id="tab-quiz">
+
+    <div class="sec-head">Test Your Knowledge</div>
+    <p>Click an answer to see if you're right.</p>
+
+    <div class="quiz-card">
+      <div class="quiz-q">Q1. What does JavaScript's <code>array.pop()</code> return when the array is empty?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answer(this,'wrong','null is not returned — JS arrays do not throw on empty pop.')">null</button>
+        <button class="quiz-opt" onclick="answer(this,'correct','✓ Correct! JS returns undefined for pop on an empty array. This is why checking isEmpty() before popping matters.')">undefined</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','No error is thrown. JS silently returns undefined.')">Throws a TypeError</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','pop() does not return 0.')">0</button>
+      </div>
+      <div class="quiz-explain" id="exp0"></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">Q2. For input <code>"(]"</code>, at which step does isValid return false?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answer(this,'wrong','( is an opener — it just gets pushed. No check happens yet.')">When processing <code>(</code></button>
+        <button class="quiz-opt" onclick="answer(this,'correct','✓ Correct! ] expects [ on top of stack. But ( is on top. Mismatch → return false immediately.')">When processing <code>]</code></button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','We never reach the end-check because we returned early on the mismatch.')">At the final stack.length check</button>
+      </div>
+      <div class="quiz-explain" id="exp1"></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">Q3. What is the space complexity of Valid Parentheses?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answer(this,'wrong','O(1) means constant space — not the case since the stack can grow with input size.')">O(1)</button>
+        <button class="quiz-opt" onclick="answer(this,'correct','✓ Correct! Worst case: all characters are openers (e.g. "((((") — every one gets pushed, so stack size = n.')">O(n)</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','O(n²) would imply a nested loop — not present here.')">O(n²)</button>
+      </div>
+      <div class="quiz-explain" id="exp2"></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">Q4. Why does <code>map[ch]</code> correctly identify closing brackets?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answer(this,'wrong','Actually the map keys are ), }, ] — the closers.')">map has opening brackets as keys</button>
+        <button class="quiz-opt" onclick="answer(this,'correct','✓ Correct! map = { ")":"(", ...}. Keys are closers. So map[ch] is truthy only for ), ], } and undefined (falsy) for openers.')">map has closing brackets as keys, so lookup is truthy only for closers</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','JavaScript has no native bracket detection — we define this ourselves in the map.')">JavaScript natively detects bracket types</button>
+      </div>
+      <div class="quiz-explain" id="exp3"></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">Q5. Which pattern would you use for "Next Greater Element"?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answer(this,'wrong','A simple stack works but without the monotonic ordering trick it would be O(n²).')">Simple Stack</button>
+        <button class="quiz-opt" onclick="answer(this,'correct','✓ Correct! A monotonic (decreasing) stack. Keep popping while top < current element. Each pop reveals a "next greater" answer in O(n) total.')">Monotonic Stack</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','A queue is FIFO — it does not help with "previous" or "next greater" comparisons.')">Queue</button>
+        <button class="quiz-opt" onclick="answer(this,'wrong','Binary search needs sorted data and does not naturally track "next greater" relationships.')">Binary Search</button>
+      </div>
+      <div class="quiz-explain" id="exp4"></div>
+    </div>
+
+  </div>
+</div><!-- /page -->
+
+<script>
+/* ══════════ BACKGROUND CANVAS — Floating nodes + beams ══════════ */
+(function(){
+  const c = document.getElementById('bgCanvas');
+  const ctx = c.getContext('2d');
+  let W, H, nodes = [];
+
+  function resize(){
+    W = c.width  = window.innerWidth;
+    H = c.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Node {
+    constructor(){
+      this.x = Math.random()*W;
+      this.y = Math.random()*H;
+      this.vx = (Math.random()-0.5)*0.25;
+      this.vy = (Math.random()-0.5)*0.25;
+      this.r  = Math.random()*1.5+0.4;
+      this.alpha = Math.random()*0.4+0.1;
+    }
+    update(){
+      this.x += this.vx; this.y += this.vy;
+      if(this.x<0||this.x>W) this.vx*=-1;
+      if(this.y<0||this.y>H) this.vy*=-1;
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(0,245,255,${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  for(let i=0;i<80;i++) nodes.push(new Node());
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<nodes.length;i++){
+      nodes[i].update();
+      nodes[i].draw();
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle=`rgba(0,245,255,${0.06*(1-d/120)})`;
+          ctx.lineWidth=0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ══════════ PARTICLE BURST ══════════ */
+function burst(x, y, color){
+  for(let i=0;i<14;i++){
+    const p = document.createElement('div');
+    const angle = (i/14)*Math.PI*2;
+    const dist  = 40+Math.random()*60;
+    p.className='particle';
+    p.style.cssText=`
+      left:${x}px;top:${y}px;
+      width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;
+      background:${color};
+      --tx:${Math.cos(angle)*dist}px;
+      --ty:${Math.sin(angle)*dist}px;
+      --dur:${0.5+Math.random()*0.5}s;
+      box-shadow:0 0 6px ${color};
+    `;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 1000);
+  }
+}
+
+/* ══════════ TABS ══════════ */
+function switchTab(id, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ══════════ QUIZ ══════════ */
+function answer(btn, verdict, explain){
+  const card = btn.closest('.quiz-card');
+  if(card.dataset.answered) return;
+  card.dataset.answered='1';
+  btn.classList.add(verdict);
+  const rect = btn.getBoundingClientRect();
+  burst(rect.left+rect.width/2, rect.top+rect.height/2,
+    verdict==='correct' ? 'var(--green)' : 'var(--red)');
+  const idx = [...document.querySelectorAll('.quiz-card')].indexOf(card);
+  const expEl = document.getElementById('exp'+idx);
+  if(expEl){ expEl.style.display='block'; expEl.textContent=explain; }
+}
+
+/* ══════════ VISUALIZER ══════════ */
+const MAP = {')':'(', '}':'{', ']':'['};
+let steps=[], currentStep=-1, autoTimer=null, autoRunning=false, autoSpeed=700;
+
+function buildSteps(s){
+  const res=[], stack=[];
+  res.push({type:'init',stack:[],i:-1,msg:'Initialise: stack = []',log:'log-info',cl:'cl2'});
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(MAP[c]){
+      const top=stack[stack.length-1];
+      if(top===MAP[c]){
+        stack.pop();
+        res.push({type:'pop',stack:[...stack],i,char:c,msg:`'${c}' closes '${top}' → POP`,log:'log-pop',cl:'cl7'});
+      } else {
+        res.push({type:'error',stack:[...stack],i,char:c,msg:`'${c}' expects '${MAP[c]}' but got '${top||'empty'}' → FALSE`,log:'log-err',cl:'cl7'});
+        res.push({type:'done',stack:[...stack],i,result:false,msg:'return false',log:'log-err',cl:'cl7'});
+        return res;
+      }
+    } else {
+      stack.push(c);
+      res.push({type:'push',stack:[...stack],i,char:c,msg:`'${c}' is opener → PUSH`,log:'log-push',cl:'cl9'});
+    }
+  }
+  const ok=stack.length===0;
+  res.push({type:'done',stack:[...stack],i:s.length,result:ok,
+    msg:ok?'Stack empty → return true ✓':`Stack [${stack.join('')}] not empty → return false`,
+    log:ok?'log-info':'log-err',cl:'cl12'});
+  return res;
+}
+
+function renderString(s,activeIdx,states){
+  const el=document.getElementById('stringDisplay');
+  el.innerHTML='';
+  for(let i=0;i<s.length;i++){
+    const cell=document.createElement('div');
+    cell.className='char-cell';
+    cell.textContent=s[i];
+    if(i===activeIdx){
+      const st=steps[currentStep];
+      cell.className+=(st&&st.type==='error')?' error-cell':' active';
+    } else if(i<activeIdx){
+      const st=states[i];
+      cell.className+=st==='push'?' done-push':st==='pop'?' done-pop':' done-ok';
+    }
+    el.appendChild(cell);
+  }
+}
+
+function renderStack(stack){
+  const area=document.getElementById('stackArea');
+  area.querySelectorAll('.stack-vis-item').forEach(e=>e.remove());
+  document.getElementById('stackEmpty').style.display=stack.length?'none':'block';
+  const base=area.querySelector('.stack-vis-base');
+  stack.forEach((ch,idx)=>{
+    const item=document.createElement('div');
+    item.className='stack-vis-item';
+    item.textContent=ch;
+    const badge=document.createElement('span');
+    badge.className='sidx'; badge.textContent=idx;
+    item.appendChild(badge);
+    area.insertBefore(item, base.nextSibling);
+  });
+  document.getElementById('vSize').textContent=stack.length;
+}
+
+function addLog(msg,type){
+  const list=document.getElementById('logList');
+  const entry=document.createElement('div');
+  entry.className=`log-entry ${type}`;
+  entry.innerHTML=`<span class="log-dot"></span>${msg}`;
+  list.appendChild(entry);
+  list.scrollTop=list.scrollHeight;
+}
+
+function hlCode(id){
+  document.querySelectorAll('.code-line').forEach(el=>el.classList.remove('hl'));
+  if(id){const el=document.getElementById(id);if(el)el.classList.add('hl');}
+}
+
+let charStates=[];
+
+function step(){
+  const s=document.getElementById('inputStr').value.trim();
+  if(!s) return;
+  if(steps.length===0){
+    steps=buildSteps(s);
+    currentStep=-1;
+    charStates=new Array(s.length).fill('');
+    document.getElementById('logList').innerHTML='';
+    document.getElementById('resultBanner').className='result-banner';
+    renderStack([]);
+    renderString(s,-1,charStates);
+  }
+  currentStep++;
+  if(currentStep>=steps.length){stopAuto();return;}
+  const st=steps[currentStep];
+  addLog(st.msg,st.log);
+  hlCode(st.cl);
+  renderStack(st.stack);
+  document.getElementById('vStep').textContent=currentStep+1;
+  document.getElementById('vOps').textContent=currentStep;
+
+  const total=s.length, idx=Math.max(0,st.i+1);
+  document.getElementById('stepFill').style.width=total>0?Math.min(100,(idx/total)*100)+'%':'0%';
+  document.getElementById('stepLabel').textContent=`${currentStep+1} / ${steps.length}`;
+
+  if(st.i>=0&&st.i<s.length){
+    charStates[st.i]=st.type;
+    renderString(s,st.i,charStates);
+    // burst on events
+    const cells=document.querySelectorAll('#stringDisplay .char-cell');
+    if(cells[st.i]){
+      const r=cells[st.i].getBoundingClientRect();
+      if(st.type==='push') burst(r.left+r.width/2,r.top+r.height/2,'#39ff6b');
+      else if(st.type==='pop') burst(r.left+r.width/2,r.top+r.height/2,'#00f5ff');
+      else if(st.type==='error') burst(r.left+r.width/2,r.top+r.height/2,'#ff3860');
+    }
+  } else {
+    renderString(s,-1,charStates);
+  }
+
+  if(st.type==='done'){
+    const b=document.getElementById('resultBanner');
+    b.className='result-banner visible '+(st.result?'valid':'invalid');
+    document.getElementById('resultIcon').textContent=st.result?'✓':'✕';
+    document.getElementById('resultText').textContent=st.result
+      ?'VALID — all brackets matched!'
+      :'INVALID — mismatch or unclosed brackets.';
+    // big burst on result
+    setTimeout(()=>{
+      const br=b.getBoundingClientRect();
+      burst(br.left+br.width/2,br.top+br.height/2,st.result?'#39ff6b':'#ff3860');
+      burst(br.left+br.width/4,br.top+br.height/2,st.result?'#00f5ff':'#ff3860');
+      burst(br.left+br.width*0.75,br.top+br.height/2,st.result?'#9d4edd':'#ff3860');
+    },100);
+    stopAuto();
+    document.getElementById('btnStep').disabled=true;
+  }
+}
+
+function toggleAuto(){
+  if(autoRunning){stopAuto();return;}
+  autoRunning=true;
+  const btn=document.getElementById('btnAuto');
+  btn.textContent='⏸ PAUSE'; btn.classList.add('running');
+  runAuto();
+}
+
+function runAuto(){
+  if(!autoRunning) return;
+  step();
+  const st=steps[currentStep];
+  if(st&&st.type==='done'){stopAuto();return;}
+  if(currentStep>=steps.length-1){stopAuto();return;}
+  autoTimer=setTimeout(runAuto,autoSpeed);
+}
+
+function stopAuto(){
+  autoRunning=false; clearTimeout(autoTimer);
+  const btn=document.getElementById('btnAuto');
+  btn.textContent='⚡ AUTO'; btn.classList.remove('running');
+}
+
+function reset(){
+  stopAuto();
+  steps=[]; currentStep=-1; charStates=[];
+  document.getElementById('logList').innerHTML='<div class="log-entry log-info"><span class="log-dot"></span>Reset — ready.</div>';
+  document.getElementById('stackArea').querySelectorAll('.stack-vis-item').forEach(e=>e.remove());
+  document.getElementById('stackEmpty').style.display='block';
+  document.getElementById('stringDisplay').innerHTML='';
+  document.getElementById('stepFill').style.width='0%';
+  document.getElementById('stepLabel').textContent='0 / 0';
+  document.getElementById('vStep').textContent='0';
+  document.getElementById('vSize').textContent='0';
+  document.getElementById('vOps').textContent='0';
+  document.getElementById('btnStep').disabled=false;
+  document.getElementById('resultBanner').className='result-banner';
+  hlCode(null);
+}
+
+function setPreset(val){ document.getElementById('inputStr').value=val; reset(); }
+function updateSpeed(){
+  autoSpeed=+document.getElementById('speedSlider').value;
+  document.getElementById('speedLabel').textContent=autoSpeed+'ms';
+}
+
+document.getElementById('inputStr').addEventListener('input',()=>{ if(steps.length>0) reset(); });
+</script>
+</body>
+</html>
